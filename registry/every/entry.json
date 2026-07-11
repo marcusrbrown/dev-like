@@ -1,0 +1,18 @@
+{
+  "slug": "every",
+  "name": "Every",
+  "kind": "org",
+  "aliases": ["every.to", "everyinc", "every inc"],
+  "consentTier": "self-published",
+  "updated": "2026-07-11",
+  "homepage": "https://every.to",
+  "sources": [
+    { "url": "https://github.com/EveryInc/compound-engineering-plugin", "fetched": "2026-07-11", "tier": "self-published", "note": "CEP - their culture, already codified" },
+    { "url": "https://every.to/chain-of-thought/compound-engineering-how-every-codes-with-agents", "fetched": "2026-07-11", "tier": "stated", "note": "Dan Shipper canonical essay" },
+    { "url": "https://every.to/source-code/my-ai-had-already-fixed-the-code-before-i-saw-it", "fetched": "2026-07-11", "tier": "stated", "note": "Kieran Klaassen origin story" },
+    { "url": "https://every.to/guides/compound-engineering", "fetched": "2026-07-11", "tier": "stated" },
+    { "url": "https://every.to/podcast/transcript-how-two-engineers-ship-like-a-team-of-15-with-ai-agents", "fetched": "2026-07-11", "tier": "stated" },
+    { "url": "https://www.lennysnewsletter.com/p/inside-every-dan-shipper", "fetched": "2026-07-11", "tier": "social", "note": "third-party interview" },
+    { "url": "https://github.com/kieranklaassen", "fetched": "2026-07-11", "tier": "observed", "note": "Ruby AI gems, Cora stack signals" }
+  ]
+}

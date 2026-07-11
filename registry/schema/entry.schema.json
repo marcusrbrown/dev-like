@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/marcusrbrown/dev-like/main/registry/schema/entry.schema.json",
+  "title": "dev-like registry entry",
+  "type": "object",
+  "required": ["slug", "name", "kind", "consentTier", "updated", "sources"],
+  "additionalProperties": false,
+  "properties": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 48 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "kind": { "enum": ["org", "person"] },
+    "aliases": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "consentTier": { "enum": ["self-published", "stated", "observed", "social"] },
+    "updated": { "type": "string", "format": "date" },
+    "homepage": { "type": "string", "format": "uri" },
+    "contributors": { "type": "array", "items": { "type": "string" } },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["url", "fetched", "tier"],
+        "additionalProperties": false,
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "fetched": { "type": "string", "format": "date" },
+          "tier": { "enum": ["self-published", "stated", "observed", "social"] },
+          "note": { "type": "string", "maxLength": 256 }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "person" } } },
+      "then": { "properties": { "consentTier": { "enum": ["self-published", "stated"] } } }
+    }
+  ]
+}

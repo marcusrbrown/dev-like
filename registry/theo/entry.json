@@ -1,0 +1,16 @@
+{
+  "slug": "theo",
+  "name": "Theo Browne",
+  "kind": "person",
+  "aliases": ["theo.gg", "t3.gg", "t3", "theo browne", "t3dotgg"],
+  "consentTier": "stated",
+  "updated": "2026-07-11",
+  "homepage": "https://t3.gg",
+  "sources": [
+    { "url": "https://create.t3.gg/", "fetched": "2026-07-11", "tier": "stated", "note": "T3 stack axioms incl. 'bleed responsibly'" },
+    { "url": "https://github.com/t3-oss", "fetched": "2026-07-11", "tier": "observed", "note": "create-t3-app, t3-env" },
+    { "url": "https://github.com/t3dotgg", "fetched": "2026-07-11", "tier": "observed" },
+    { "url": "https://www.youtube.com/@t3dotgg", "fetched": "2026-07-11", "tier": "stated", "note": "primary publishing channel" },
+    { "url": "https://betterstack.com/community/guides/ai/t3-code/", "fetched": "2026-07-11", "tier": "stated", "note": "T3 Code: parallel agents over worktrees" }
+  ]
+}
