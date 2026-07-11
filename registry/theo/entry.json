@@ -7,10 +7,14 @@
   "updated": "2026-07-11",
   "homepage": "https://t3.gg",
   "sources": [
-    { "url": "https://create.t3.gg/", "fetched": "2026-07-11", "tier": "stated", "note": "T3 stack axioms incl. 'bleed responsibly'" },
+    { "url": "https://create.t3.gg/en/introduction/", "fetched": "2026-07-11", "tier": "stated", "note": "T3 stack axioms incl. 'bleed responsibly', typesafety" },
+    { "url": "https://t3.gg/blog/post/types-and-nextjs", "fetched": "2026-07-11", "tier": "stated", "note": "full-stack typesafety, inference over hand-written types" },
+    { "url": "https://t3.gg/blog/post/2023-tech", "fetched": "2026-07-11", "tier": "stated", "note": "delivery/iteration/DX priorities, preferred stack" },
+    { "url": "https://create.t3.gg/en/usage/drizzle", "fetched": "2026-07-11", "tier": "stated", "note": "Drizzle officially supported in create-t3-app" },
     { "url": "https://github.com/t3-oss", "fetched": "2026-07-11", "tier": "observed", "note": "create-t3-app, t3-env" },
     { "url": "https://github.com/t3dotgg", "fetched": "2026-07-11", "tier": "observed" },
+    { "url": "https://github.com/pingdotgg/t3code", "fetched": "2026-07-11", "tier": "stated", "note": "T3 Code: current agent GUI product" },
     { "url": "https://www.youtube.com/@t3dotgg", "fetched": "2026-07-11", "tier": "stated", "note": "primary publishing channel" },
-    { "url": "https://betterstack.com/community/guides/ai/t3-code/", "fetched": "2026-07-11", "tier": "stated", "note": "T3 Code: parallel agents over worktrees" }
+    { "url": "https://betterstack.com/community/guides/ai/t3-code/", "fetched": "2026-07-11", "tier": "social", "note": "third-party; sole current source for 'prompts are tech debt' attribution" }
   ]
 }
