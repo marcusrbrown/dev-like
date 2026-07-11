@@ -5,24 +5,24 @@ unless noted. Verification criteria inline — nothing checks off on vibes.
 
 ## Phase 0 — Claims (do immediately, ~30 min)
 
-- [ ] Push this scaffold to `marcusrbrown/dev-like` (public), CI green on first push
-- [ ] Claim `dev-like` on npm: manual `npm publish` of 0.1.0 with 2FA (trusted publishing
+- [x] Push this scaffold to `marcusrbrown/dev-like` (public), CI green on first push
+- [x] Claim `dev-like` on npm: manual `npm publish` of 0.1.0 with 2FA (trusted publishing
       config requires the package to exist first)
-- [ ] Repo topics: `agent-skills`, `claude-code`, `codex`, `cursor`, `ai-agents` +
+- [x] Repo topics: `agent-skills`, `claude-code`, `codex`, `cursor`, `ai-agents` +
       description matching package.json
-- [ ] Verify `/dev-like` doesn't collide with a bundled Claude Code command
+- [x] Verify `/dev-like` doesn't collide with a bundled Claude Code command
 
 ## Phase 0.5 — Retool (before any Phase 1 work)
 
 Match house tooling (Space Bus is the closest template; Systematic uses semantic-release —
 don't copy that):
 
-- [ ] Bun for package management + scripts (`bun.lock`, `bunfig.toml` if needed); CLI stays
+- [x] Bun for package management + scripts (`bun.lock`, `bunfig.toml` if needed); CLI stays
       plain-node runnable (`npx dev-like`), zero runtime deps invariant holds — Bun/Changesets
       are devDeps only
-- [ ] Changesets for versioning/publishing: `.changeset/config.json`, changesets/action-based
+- [x] Changesets for versioning/publishing: `.changeset/config.json`, changesets/action-based
       `release.yaml` (version PR flow) replacing the tag-triggered `release.yml`
-- [ ] CI converted to Bun (`oven-sh/setup-bun`), validate + test scripts unchanged in behavior
+- [x] CI converted to Bun (`oven-sh/setup-bun`), validate + test scripts unchanged in behavior
 - [ ] npm trusted publisher configured only AFTER this lands, pointing at the final workflow
       filename (moved here from Phase 2 to avoid redoing OIDC setup)
 
