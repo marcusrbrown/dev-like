@@ -23,8 +23,9 @@ don't copy that):
 - [x] Changesets for versioning/publishing: `.changeset/config.json`, changesets/action-based
       `release.yaml` (version PR flow) replacing the tag-triggered `release.yml`
 - [x] CI converted to Bun (`oven-sh/setup-bun`), validate + test scripts unchanged in behavior
-- [ ] npm trusted publisher configured only AFTER this lands, pointing at the final workflow
-      filename (moved here from Phase 2 to avoid redoing OIDC setup)
+- [x] npm trusted publisher configured only AFTER this lands, pointing at the final workflow
+      filename (moved here from Phase 2 to avoid redoing OIDC setup) — verified: 0.1.1
+      published via OIDC with SLSA provenance attestation
 
 ## Phase 1 — MVP (v0.2)
 
