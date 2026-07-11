@@ -35,6 +35,11 @@
   "scripts": {
     "validate": "node scripts/validate.mjs",
     "test": "node --test tests/*.test.mjs",
-    "prepublishOnly": "npm run validate && npm test"
+    "prepublishOnly": "bun run validate && bun run test",
+    "version-changesets": "changeset version",
+    "publish-changesets": "changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.7"
   }
 }
