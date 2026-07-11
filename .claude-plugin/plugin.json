@@ -1,0 +1,9 @@
+{
+  "name": "dev-like",
+  "description": "Profile a shop's engineering culture from public sources and generate develop-like-<target> skills. /dev-like Every",
+  "version": "0.1.0",
+  "author": { "name": "Marcus R. Brown", "url": "https://github.com/marcusrbrown" },
+  "homepage": "https://github.com/marcusrbrown/dev-like",
+  "repository": "https://github.com/marcusrbrown/dev-like",
+  "license": "MIT"
+}
