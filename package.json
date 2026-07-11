@@ -2,7 +2,15 @@
   "name": "dev-like",
   "version": "0.1.0",
   "description": "Profile a shop's engineering culture from public sources and install develop-like-<target> agent skills. /dev-like Every",
-  "keywords": ["agent-skills", "skills", "claude-code", "codex", "cursor", "ai-agents", "engineering-culture"],
+  "keywords": [
+    "agent-skills",
+    "skills",
+    "claude-code",
+    "codex",
+    "cursor",
+    "ai-agents",
+    "engineering-culture"
+  ],
   "license": "MIT",
   "author": "Marcus R. Brown (https://github.com/marcusrbrown)",
   "repository": {
@@ -11,13 +19,22 @@
   },
   "homepage": "https://github.com/marcusrbrown/dev-like#readme",
   "type": "module",
-  "bin": { "dev-like": "./bin/cli.mjs" },
-  "files": ["bin", "skills", "registry", "README.md", "LICENSE"],
-  "engines": { "node": ">=20" },
+  "bin": {
+    "dev-like": "bin/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "skills",
+    "registry",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "validate": "node scripts/validate.mjs",
     "test": "node --test tests/*.test.mjs",
     "prepublishOnly": "npm run validate && npm test"
-  },
-  "publishConfig": { "provenance": true }
+  }
 }
