@@ -12,7 +12,11 @@
     { "url": "https://every.to/source-code/my-ai-had-already-fixed-the-code-before-i-saw-it", "fetched": "2026-07-11", "tier": "stated", "note": "Kieran Klaassen origin story" },
     { "url": "https://every.to/guides/compound-engineering", "fetched": "2026-07-11", "tier": "stated" },
     { "url": "https://every.to/podcast/transcript-how-two-engineers-ship-like-a-team-of-15-with-ai-agents", "fetched": "2026-07-11", "tier": "stated" },
-    { "url": "https://www.lennysnewsletter.com/p/inside-every-dan-shipper", "fetched": "2026-07-11", "tier": "social", "note": "third-party interview" },
-    { "url": "https://github.com/kieranklaassen", "fetched": "2026-07-11", "tier": "observed", "note": "Ruby AI gems, Cora stack signals" }
+    { "url": "https://every.to/guides/compound-engineering", "fetched": "2026-07-11", "tier": "stated", "note": "verified: 80/20 split, four-step core loop, agent-native parity, safety nets" },
+    { "url": "https://github.com/EveryInc/compound-engineering-plugin/blob/main/AGENTS.md", "fetched": "2026-07-11", "tier": "self-published", "note": "canonical repo instruction file, provenance rules" },
+    { "url": "https://github.com/EveryInc/compound-engineering-plugin/blob/main/docs/skills/ce-compound.md", "fetched": "2026-07-11", "tier": "self-published", "note": "/ce-compound writes docs/solutions/" },
+    { "url": "https://github.com/EveryInc/compound-engineering-plugin/blob/main/skills/ce-compound-refresh/SKILL.md", "fetched": "2026-07-11", "tier": "self-published", "note": "docs/solutions/ discoverability discipline" },
+    { "url": "https://www.lennysnewsletter.com/p/inside-every-dan-shipper", "fetched": "2026-07-11", "tier": "social", "note": "third-party interview; verified 15 people / 5 products / 'virtually zero code'" },
+    { "url": "https://github.com/kieranklaassen", "fetched": "2026-07-11", "tier": "observed", "note": "profile page thin; stack signal better carried by SF Ruby keynote" }
   ]
 }
