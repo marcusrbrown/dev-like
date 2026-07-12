@@ -30,12 +30,12 @@ don't copy that):
 ## Phase 1 — MVP (v0.2)
 
 **Skill (the product):**
-- [ ] Harden both seed profiles: re-fetch every source, real fetch dates, expand
+- [x] Harden both seed profiles: re-fetch every source, real fetch dates, expand
       principles with citations — treat `every` as the reference-quality bar
-- [ ] Prebuilt `registry/every/skill/develop-like-every/` (zero-LLM install path);
-      snapshot test: profile.md → skill generation is deterministic
-- [ ] Skill-generation template extracted from `references/distilling.md` into
-      `skills/dev-like/assets/` (templates are assets, not prose)
+- [x] Prebuilt `registry/every/skill/develop-like-every/` (zero-LLM install path);
+      snapshot test: profile.md → skill generation is deterministic (`--check` + 9-test suite)
+- [x] Skill-generation template extracted from `references/distilling.md` into
+      `skills/dev-like/assets/` (templates are assets, not prose) — `scripts/generate-skill.mjs`
 - [ ] End-to-end dry run: `/dev-like Every` in Claude Code on a scratch project — cache-hit
       path produces a working `develop-like-every` skill; record transcript for docs
 - [ ] End-to-end cache-miss run against a shop NOT in the registry; verify the PR-back
