@@ -1,7 +1,7 @@
 ---
 name: develop-like-every
 description: >-
-  Develop the way Every does: compound engineering, plan-first 80/20, boring Rails under aggressive AI leverage. Use when the user wants
+  Develop the way Every (the company) does: compound engineering, plan-first 80/20, boring Rails under aggressive AI leverage. Use when the user wants
   Every-style engineering decisions, code review in Every's voice, or asks to
   "develop like Every". Profiled 2026-07-11 from public sources.
 license: MIT
