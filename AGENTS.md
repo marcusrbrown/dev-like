@@ -1,8 +1,6 @@
 # dev-like — agent context
 
 Read DESIGN.md before structural changes; it holds the decisions and their rationale.
-HANDOFF.md has current session state and next actions (delete it when stale). LAUNCH.md is
-the dependency-ordered roadmap.
 
 - This repo is simultaneously: an Agent Skill (`skills/dev-like/`), a Claude Code plugin +
   marketplace (`.claude-plugin/`), an npm package (`dev-like`, CLI in `bin/`), and a data
@@ -14,3 +12,6 @@ the dependency-ordered roadmap.
   generated skills.
 - Design for deletion: nothing outside `registry/<slug>/` and `registry/index.json` may
   reference a registry slug.
+- `docs/solutions/` — documented solutions to past problems (release pipeline, git
+  workflows, best practices), organized by category with YAML frontmatter (`module`,
+  `tags`, `problem_type`). Relevant when working in a documented area.
