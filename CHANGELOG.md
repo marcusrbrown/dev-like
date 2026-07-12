@@ -1,5 +1,15 @@
 # dev-like
 
+## 0.3.0
+
+### Minor Changes
+
+- 3f7aa98: Registry entry #3: `oxide` (Oxide Computer Company) — RFD-driven decisions, Rust-heavy co-design, rigor with urgency. Profile, entry, and prebuilt `develop-like-oxide` skill, 17 first-party sources.
+
+### Patch Changes
+
+- 90e5786: Quality gates: provenance link-rot checker (`scripts/check-links.mjs` + weekly Link Check CI with auto-filed issues), opt-out/profile-request issue forms, PR template with consent-tier checklist, description-trigger evals (60/60 stable), paired LLM eval harness (`bun run eval:paired`).
+
 ## 0.2.0
 
 ### Minor Changes
