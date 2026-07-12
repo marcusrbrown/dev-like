@@ -1,5 +1,9 @@
 # dev-like
 
+[![npm](https://img.shields.io/npm/v/dev-like)](https://www.npmjs.com/package/dev-like)
+[![CI](https://github.com/marcusrbrown/dev-like/actions/workflows/ci.yaml/badge.svg)](https://github.com/marcusrbrown/dev-like/actions/workflows/ci.yaml)
+[![Link Check](https://github.com/marcusrbrown/dev-like/actions/workflows/link-check.yaml/badge.svg)](https://github.com/marcusrbrown/dev-like/actions/workflows/link-check.yaml)
+
 > Steal the workflow, not the code. `/dev-like Every` and your agent develops like the
 > shops you admire — with receipts.
 
@@ -13,15 +17,15 @@ Every claim in a generated skill links to the public source it came from. No sou
 ## Install
 
 ```bash
-# Universal (55 harnesses — Claude Code, Codex, Cursor, Copilot, Gemini CLI, ...)
+# Universal — symlinks into every detected harness (Claude Code, Codex, Cursor, Copilot, ...)
 npx skills add marcusrbrown/dev-like
 
 # Claude Code plugin (bare /dev-like command)
 /plugin marketplace add marcusrbrown/dev-like
 /plugin install dev-like
 
-# CLI (cached registry installs)
-npx dev-like every
+# CLI — install a cached profile's skill directly, no LLM needed
+npx dev-like oxide
 ```
 
 ## Use
@@ -31,6 +35,22 @@ npx dev-like every
 /dev-like Theo         # aliases work: theo.gg, t3.gg, t3
 /dev-like SomeNewShop  # uncached: live OSINT profile -> skill -> offers to PR it back
 ```
+
+What changes? Same prompt, before and after — see the
+[dry-run transcript](docs/demo/every-dryrun-2026-07-11.md): a generic senior-engineer review
+becomes one that runs on the shop's actual operating model, every point traceable to a cited
+source.
+
+## Registry
+
+| Slug | Kind | Consent tier | Skill |
+|------|------|--------------|-------|
+| [`every`](registry/every/) | org | self-published | [develop-like-every](registry/every/skill/develop-like-every/) |
+| [`oxide`](registry/oxide/) | org | self-published | [develop-like-oxide](registry/oxide/skill/develop-like-oxide/) |
+| [`theo`](registry/theo/) | person | stated | generated on demand |
+
+Want a shop profiled? [Request it](https://github.com/marcusrbrown/dev-like/issues/new?template=profile-request.yml)
+— or run `/dev-like <target>` and PR the result back.
 
 ## How it works
 
@@ -51,9 +71,14 @@ extract principles and workflow shapes — never reproduce prose.
 ## Development
 
 ```bash
-node scripts/validate.mjs   # frontmatter + registry schema + index sync
-node --test tests/
+bun install
+bun run validate   # frontmatter + registry schema + index sync
+bun run test       # generator, CLI install, link-collection suites
 ```
+
+Plain node works too (`node scripts/validate.mjs`, `node --test tests/`) — the package has
+zero runtime dependencies. Provenance links are re-checked weekly in CI; trigger evals and the
+paired workflow eval live in [evals/](evals/).
 
 See [DESIGN.md](DESIGN.md) for architecture and [CONTRIBUTING.md](CONTRIBUTING.md) for
 adding registry profiles.
