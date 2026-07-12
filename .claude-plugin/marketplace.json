@@ -4,7 +4,7 @@
   "plugins": [
     {
       "name": "dev-like",
-      "source": ".",
+      "source": "./",
       "description": "Profile a shop's engineering culture from public sources and generate develop-like-<target> skills."
     }
   ]
