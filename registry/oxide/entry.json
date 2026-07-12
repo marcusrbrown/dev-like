@@ -1,0 +1,29 @@
+{
+  "slug": "oxide",
+  "name": "Oxide",
+  "kind": "org",
+  "aliases": ["oxide computer", "oxide computer company", "oxidecomputer", "oxide.computer"],
+  "consentTier": "self-published",
+  "updated": "2026-07-11",
+  "homepage": "https://oxide.computer",
+  "summary": "RFD-driven written decisions, Rust-heavy hardware/software co-design, rigor with urgency, radical transparency",
+  "sources": [
+    { "url": "https://rfd.shared.oxide.computer/rfd/0001", "fetched": "2026-07-11", "tier": "self-published", "note": "the RFD process itself: states, scope, written determinations" },
+    { "url": "https://rfd.shared.oxide.computer/rfd/0005", "fetched": "2026-07-11", "tier": "self-published", "note": "named engineering phases scoping through production" },
+    { "url": "https://rfd.shared.oxide.computer/rfd/0107", "fetched": "2026-07-11", "tier": "self-published", "note": "control-plane workflows as observable, recoverable sagas" },
+    { "url": "https://rfd.shared.oxide.computer/rfd/0113", "fetched": "2026-07-11", "tier": "self-published", "note": "decision values: responsibility, rigor, urgency, courage, versatility, teamwork, thriftiness" },
+    { "url": "https://oxide.computer/blog/a-tool-for-discussion", "fetched": "2026-07-11", "tier": "self-published", "note": "RFDs as collaboration medium; discussion in GitHub PRs" },
+    { "url": "https://oxide.computer/blog/engineering-culture", "fetched": "2026-07-11", "tier": "self-published", "note": "recorded meetings, no perf reviews, no metrics, Demo Friday, remote-first" },
+    { "url": "https://oxide.computer/blog/the-cloud-computer", "fetched": "2026-07-11", "tier": "self-published", "note": "hardware/software co-design; open-source firmware and root of trust" },
+    { "url": "https://oxide.computer/blog/building-big-systems-with-remote-hardware-teams", "fetched": "2026-07-11", "tier": "self-published", "note": "distributed hardware work via prototyping tooling; directed autonomy" },
+    { "url": "https://oxide.computer/blog/compensation-as-a-reflection-of-values", "fetched": "2026-07-11", "tier": "self-published", "note": "canonical uniform-salary post" },
+    { "url": "https://oxide.computer/blog/oxides-compensation-model-how-is-it-going", "fetched": "2026-07-11", "tier": "self-published", "note": "comp model retrospective; sales exception" },
+    { "url": "https://oxide.computer/blog/iddqd-unsafe", "fetched": "2026-07-11", "tier": "self-published", "note": "unsafe-Rust rigor; frontier models used to probe correctness" },
+    { "url": "https://github.com/oxidecomputer/omicron/pull/10628", "fetched": "2026-07-11", "tier": "self-published", "note": "CLAUDE.md + AGENTS.md convention; nested code-local agent docs; cargo/clippy/rustfmt/nextest loop" },
+    { "url": "https://github.com/oxidecomputer/buildomat", "fetched": "2026-07-11", "tier": "self-published", "note": "first-party CI/job orchestrator, MPL-2.0" },
+    { "url": "https://p99conf.io/session/sharpening-the-axe-the-primacy-of-toolmaking/", "fetched": "2026-07-11", "tier": "stated", "note": "Cantrill on toolmaking as core engineering work" },
+    { "url": "https://oxide-and-friends.transistor.fm/episodes/engineering-rigor-in-the-llm-age", "fetched": "2026-07-11", "tier": "self-published", "note": "their own podcast on LLM-era rigor" },
+    { "url": "https://oxide-and-friends.transistor.fm/episodes/this-old-repo-llms-and-the-restoration-of-battletris", "fetched": "2026-07-11", "tier": "self-published", "note": "LLM-assisted code restoration in practice" },
+    { "url": "https://steveklabnik.com/writing/memory-safety-is-a-red-herring/", "fetched": "2026-07-11", "tier": "stated", "note": "employee first-person on Rust rationale" }
+  ]
+}

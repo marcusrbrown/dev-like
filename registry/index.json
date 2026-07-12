@@ -9,6 +9,13 @@
       "consentTier": "self-published",
       "updated": "2026-07-11"
     },
+    "oxide": {
+      "name": "Oxide",
+      "kind": "org",
+      "aliases": ["oxide computer", "oxide computer company", "oxidecomputer", "oxide.computer"],
+      "consentTier": "self-published",
+      "updated": "2026-07-11"
+    },
     "theo": {
       "name": "Theo Browne",
       "kind": "person",
