@@ -1,7 +1,7 @@
 ---
 name: develop-like-{{slug}}
 description: >-
-  Develop the way {{name}} does: {{summary}}. Use when the user wants
+  Develop the way {{name}} ({{kindLabel}}) does: {{summary}}. Use when the user wants
   {{name}}-style engineering decisions, code review in {{name}}'s voice, or asks to
   "develop like {{name}}". Profiled {{profiled}} from public sources.
 license: MIT

@@ -90,6 +90,7 @@ export async function renderSkill(slug, registryDir) {
     slug,
     name: entry.name,
     summary: entry.summary ?? '',
+    kindLabel: entry.kind === 'person' ? 'the developer' : 'the company',
     profiled: entry.updated,
     consentTier: entry.consentTier,
     corePrinciple: sections['Core principle'],
