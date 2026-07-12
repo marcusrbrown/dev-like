@@ -1,0 +1,7 @@
+{
+  "name": "fixture-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scratch fixture for the develop-like-every paired eval. Not part of the dev-like package."
+}
