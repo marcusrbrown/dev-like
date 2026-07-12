@@ -42,10 +42,10 @@ don't copy that):
       offer produces a valid `registry/<slug>/` (this becomes registry entry #3)
 
 **CLI:**
-- [ ] Implement install path: resolve → fetch prebuilt skill or generate from profile →
+- [x] Implement install path: resolve → fetch prebuilt skill or generate from profile →
       write `.agents/skills/` → symlink `.claude/skills/` (copy fallback) → print actions
-- [ ] `--dry-run` flag (print, don't write) — default for anything destructive
-- [ ] Tests: resolve (done), install to tmpdir, idempotent re-install
+- [x] `--dry-run` flag (print, don't write) — drift refuses without `--force`
+- [x] Tests: resolve (done), install to tmpdir, idempotent re-install — 19 tests green
 
 **Quality gates:**
 - [ ] Description-trigger evals: 10 should-trigger / 10 near-miss prompts, 3 reps each,
