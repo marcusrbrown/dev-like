@@ -13,6 +13,7 @@
     "consentTier": { "enum": ["self-published", "stated", "observed", "social"] },
     "updated": { "type": "string", "format": "date" },
     "homepage": { "type": "string", "format": "uri" },
+    "summary": { "type": "string", "maxLength": 160, "description": "three-phrase culture summary used in generated skill descriptions" },
     "contributors": { "type": "array", "items": { "type": "string" } },
     "sources": {
       "type": "array",
