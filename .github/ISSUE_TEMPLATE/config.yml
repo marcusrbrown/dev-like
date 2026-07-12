@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Read the design doc
+    url: https://github.com/marcusrbrown/dev-like/blob/main/DESIGN.md
+    about: Rationale for consent tiers, provenance rules, and registry invariants.

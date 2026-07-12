@@ -1,0 +1,33 @@
+name: Opt out of the registry
+description: >-
+  Request removal of a profile from the registry. Removal within 48 hours, no
+  questions asked. Your target lands in registry/OPTOUT.md as a permanent
+  collection hard-stop.
+title: "optout: "
+labels: [optout]
+body:
+  - type: input
+    id: who
+    attributes:
+      label: Who
+      description: Slug or name of the entry to remove (e.g. "every" or "Every").
+      placeholder: slug-or-name
+    validations:
+      required: true
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: Relationship
+      options:
+        - I am this person
+        - I represent this org
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything else we should know (optional).
+    validations:
+      required: false

@@ -1,0 +1,40 @@
+name: Request a profile
+description: >-
+  Propose an org or person for the registry. Persons need stated-tier sources
+  or better (first-party writing/talks, not social posts).
+title: "profile-request: "
+labels: [profile-request]
+body:
+  - type: input
+    id: target
+    attributes:
+      label: Target
+      description: Org or person name.
+      placeholder: e.g. Every, DHH
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: What makes their engineering culture worth mimicking?
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: >-
+        Known first-party sources: eng blog, public configs, talks. Persons
+        require stated-tier or better.
+    validations:
+      required: false
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - org
+        - person
+    validations:
+      required: true

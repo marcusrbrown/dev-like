@@ -1,0 +1,33 @@
+name: Link Check
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: node scripts/check-links.mjs
+      - name: File issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Link rot detected $(date +%F)"
+          if [ -f link-failures.md ]; then
+            gh issue create --title "$title" --body-file link-failures.md --label link-rot \
+              || gh issue create --title "$title" --body-file link-failures.md
+          else
+            gh issue create --title "$title" --body "Link check failed; see workflow run for details." --label link-rot \
+              || gh issue create --title "$title" --body "Link check failed; see workflow run for details."
+          fi
