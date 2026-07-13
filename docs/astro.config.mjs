@@ -95,6 +95,7 @@ export default defineConfig({
           href: 'https://github.com/marcusrbrown/dev-like',
         },
       ],
+      routeMiddleware: './src/routeMiddleware.ts',
     }),
   ],
 })
