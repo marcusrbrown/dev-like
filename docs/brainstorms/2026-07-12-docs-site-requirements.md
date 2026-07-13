@@ -158,10 +158,11 @@ repo gets mrbro.dev/<repo> routing for free).
 
 - Pages re-home is done and verified for the ROOT domains (mrbro.dev 200, marcusrbrown.com
   200, github.io 301); domain verification confirmed by Marcus via settings screenshots.
-  UNVERIFIED: project-site subpath routing (mrbro.dev/dev-like/*) under the workflow-built
-  user site, including interaction with the portfolio SPA's 404 handling — first
-  implementation step is a stub Pages deploy from this repo to prove the routing before any
-  site content is built.
+  Subpath routing VERIFIED 2026-07-12 via stub Pages deploy (commit 490e816, run
+  29227517823): mrbro.dev/dev-like/ 200 + nested paths resolve, github.io/dev-like 301s to
+  canonical, non-existent paths return the project 404 (portfolio SPA does not intercept
+  /dev-like/*), portfolio root unaffected. The stub (docs/site-stub/ + site.yaml) is the
+  placeholder the real Starlight build replaces.
 - Systematic's `docs/` config is available locally to copy
   (marcusrbrown/systematic/docs/astro.config.mjs).
 - Self-hosted Umami instance exists and can accept a new site registration.
