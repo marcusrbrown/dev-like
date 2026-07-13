@@ -1,0 +1,30 @@
+name: Site
+
+# Routing probe stub — will be REPLACED by the real Starlight build later.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - docs/site-stub/**
+      - .github/workflows/site.yaml
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs/site-stub
+      - id: deployment
+        uses: actions/deploy-pages@v4
