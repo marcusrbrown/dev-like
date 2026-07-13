@@ -296,9 +296,9 @@ test('generate() is deterministic across repeated runs', async () => {
 
 // --- CLI integration ---
 
-test('CLI: exits 0 and writes generated output for the real registry', async () => {
-  const outDir = path.join(DOCS_ROOT, 'src', 'content', 'docs', '_generated')
-  const res = spawnSync('bun', [GENERATOR], { cwd: DOCS_ROOT, encoding: 'utf8' })
+test('CLI: exits 0 and writes generated output to a given --out directory', async () => {
+  const outDir = await mktmp('dev-like-docsgen-cli-')
+  const res = spawnSync('bun', [GENERATOR, '--out', outDir], { cwd: DOCS_ROOT, encoding: 'utf8' })
   try {
     assert.equal(res.status, 0, `CLI failed: ${res.stderr}`)
     assert.ok(fss.existsSync(path.join(outDir, 'index.mdx')))
@@ -307,15 +307,27 @@ test('CLI: exits 0 and writes generated output for the real registry', async () 
   }
 })
 
-test('generated output directory is ignored by git', async () => {
-  const outDir = path.join(DOCS_ROOT, 'src', 'content', 'docs', '_generated')
-  await fs.mkdir(outDir, { recursive: true })
-  const probe = path.join(outDir, 'index.mdx')
-  await fs.writeFile(probe, 'placeholder', 'utf8')
-  try {
-    const res = spawnSync('git', ['check-ignore', probe], { cwd: REPO_ROOT, encoding: 'utf8' })
-    assert.equal(res.status, 0, `expected ${probe} to be git-ignored; git check-ignore exit ${res.status}`)
-  } finally {
-    await fs.rm(outDir, { recursive: true, force: true })
+test('generated output path under docs/src/content/docs/_generated is ignored by git', () => {
+  const probe = path.join(DOCS_ROOT, 'src', 'content', 'docs', '_generated', 'index.mdx')
+  const res = spawnSync('git', ['check-ignore', '--no-index', probe], { cwd: REPO_ROOT, encoding: 'utf8' })
+  assert.equal(res.status, 0, `expected ${probe} to be git-ignored; git check-ignore exit ${res.status}`)
+})
+
+// --- Package script contract ---
+
+test('docs package.json: dev and build scripts generate registry pages before running Astro', async () => {
+  const pkg = JSON.parse(await fs.readFile(path.join(DOCS_ROOT, 'package.json'), 'utf8'))
+  for (const script of ['dev', 'build']) {
+    const command: string = pkg.scripts[script]
+    assert.ok(
+      /bun run generate/.test(command),
+      `docs package.json "${script}" script must run "bun run generate" before astro: got "${command}"`,
+    )
+    const generateIndex = command.indexOf('bun run generate')
+    const astroIndex = command.indexOf('astro')
+    assert.ok(
+      generateIndex >= 0 && astroIndex > generateIndex,
+      `docs package.json "${script}" script must run generate before astro: got "${command}"`,
+    )
   }
 })

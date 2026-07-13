@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "bun run generate && astro dev",
+    "build": "bun run generate && astro build",
     "preview": "astro preview",
     "generate": "bun scripts/generate-registry-pages.ts",
     "test": "bun test tests/*.test.ts"
