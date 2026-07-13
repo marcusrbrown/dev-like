@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "bun run generate && astro dev",
-    "build": "bun run generate && astro build",
+    "build": "bun run generate && astro build && bun run check:internal-links",
     "preview": "astro preview",
     "generate": "bun scripts/generate-registry-pages.ts",
+    "check:internal-links": "bun scripts/check-internal-links.ts",
     "test": "bun test tests/*.test.ts"
   },
   "dependencies": {
