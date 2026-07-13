@@ -15,14 +15,14 @@ export default defineConfig({
           {
             strategy: 'inline-svg',
             mermaidConfig: {
-              theme: 'dark',
+              theme: 'base',
               themeVariables: {
-                primaryColor: '#182225',
-                primaryTextColor: '#f3f6f7',
-                primaryBorderColor: '#59d3c8',
-                lineColor: '#59d3c8',
-                secondaryColor: '#243033',
-                tertiaryColor: '#101719',
+                primaryColor: 'var(--sl-color-bg)',
+                primaryTextColor: 'var(--sl-color-text)',
+                primaryBorderColor: 'var(--accent-highlighter)',
+                lineColor: 'var(--accent-highlighter)',
+                secondaryColor: 'var(--sl-color-bg-nav)',
+                tertiaryColor: 'var(--sl-color-bg-inline-code)',
               },
             },
           },
@@ -34,6 +34,7 @@ export default defineConfig({
     starlight({
       title: 'dev-like',
       favicon: '/favicon.svg',
+      customCss: ['./src/styles/custom.css'],
       description:
         "Profile a shop's engineering culture from public sources and install develop-like-<target> agent skills, with receipts.",
       head: [
