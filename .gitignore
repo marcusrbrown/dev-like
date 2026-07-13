@@ -7,4 +7,4 @@ HANDOFF.md
 .cortexkit/
 LAUNCH.md
 docs/.astro/
-docs/src/content/docs/registry/
+docs/src/content/docs/_generated/

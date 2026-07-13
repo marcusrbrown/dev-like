@@ -179,8 +179,8 @@ docs/
 │   ├── favicon.svg
 │   └── og-image.png
 ├── scripts/
-│   ├── generate-registry-pages.mjs
-│   └── check-internal-links.mjs
+│   ├── generate-registry-pages.ts
+│   └── check-internal-links.ts
 ├── src/
 │   ├── content.config.ts
 │   ├── components/
@@ -196,10 +196,10 @@ docs/
 │   └── styles/
 │       └── custom.css
 └── tests/
-    ├── generate-registry-pages.test.mjs
-    ├── landing.test.mjs
-    ├── og-analytics.test.mjs
-    └── check-internal-links.test.mjs
+    ├── generate-registry-pages.test.ts
+    ├── landing.test.ts
+    ├── og-analytics.test.ts
+    └── check-internal-links.test.ts
 ```
 
 The tree is the expected shape, not a constraint on exact helper names discovered during
@@ -274,8 +274,8 @@ flowchart TB
 - **Requirements:** R6, R7, R12
 - **Dependencies:** U1
 - **Files:**
-  - Create: `docs/scripts/generate-registry-pages.mjs`
-  - Create: `docs/tests/generate-registry-pages.test.mjs`
+  - Create: `docs/scripts/generate-registry-pages.ts`
+  - Create: `docs/tests/generate-registry-pages.test.ts`
   - Generate: `docs/src/content/docs/registry/index.mdx`
   - Generate: `docs/src/content/docs/registry/<slug>.mdx`
   - Modify: `docs/package.json`
@@ -328,7 +328,7 @@ flowchart TB
   - Create: `docs/src/content/docs/ethics.mdx`
   - Create: `docs/src/components/BeforeAfter.astro`
   - Create: `docs/src/styles/custom.css`
-  - Create: `docs/tests/landing.test.mjs`
+  - Create: `docs/tests/landing.test.ts`
 - **Approach:**
   - Use Starlight's splash template and treat the first viewport as a proof surface, not a
     generic documentation index.
@@ -376,7 +376,7 @@ flowchart TB
   - Modify: `docs/astro.config.mjs`
   - Create: `docs/src/lib/registry-og.mjs`
   - Create: `docs/src/pages/og/[...slug].png.ts`
-  - Create: `docs/tests/og-analytics.test.mjs`
+  - Create: `docs/tests/og-analytics.test.ts`
   - Modify: `docs/package.json`
 - **Approach:**
   - Generate 1200 by 630 entry cards from registry-derived title, three-phrase summary, and
@@ -416,11 +416,11 @@ flowchart TB
 - **Requirements:** R2, R6, R7; acceptance coverage for AE1 through AE6
 - **Dependencies:** U2, U3, U4
 - **Files:**
-  - Create: `docs/scripts/check-internal-links.mjs`
-  - Create: `docs/tests/check-internal-links.test.mjs`
+  - Create: `docs/scripts/check-internal-links.ts`
+  - Create: `docs/tests/check-internal-links.test.ts`
   - Modify: `docs/package.json`
 - **Approach:**
-  - Walk built HTML with Node built-ins, collect local links and asset references, normalize
+  - Walk built HTML with Node built-ins under Bun, collect local links and asset references, normalize
     trailing slashes, and resolve them against `docs/dist/`.
   - Fail on missing targets, domain-root links that bypass `/dev-like/`, or generated registry
     pages absent from the build. Ignore anchors, mail links, and external URLs.
