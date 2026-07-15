@@ -1,6 +1,7 @@
 import { unified } from '@astrojs/markdown-remark'
 import starlight from '@astrojs/starlight'
 import { defineConfig } from 'astro/config'
+import remarkGfm from 'remark-gfm'
 import rehypeMermaid from 'rehype-mermaid'
 
 export default defineConfig({
@@ -9,6 +10,7 @@ export default defineConfig({
   trailingSlash: 'always',
   markdown: {
     processor: unified({
+      remarkPlugins: [remarkGfm],
       rehypePlugins: [
         [
           rehypeMermaid,
@@ -94,6 +96,13 @@ export default defineConfig({
           label: 'GitHub',
           href: 'https://github.com/marcusrbrown/dev-like',
         },
+      ],
+      sidebar: [
+        {
+          label: 'Registry',
+          items: [{ autogenerate: { directory: '_generated' } }],
+        },
+        { label: 'Ethics & Consent', slug: 'ethics' },
       ],
       routeMiddleware: './src/routeMiddleware.ts',
     }),

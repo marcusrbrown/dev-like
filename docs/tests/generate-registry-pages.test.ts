@@ -27,7 +27,55 @@ async function copyRegistryFixture(destDir: string) {
   await fs.cp(REGISTRY_DIR, destDir, { recursive: true })
 }
 
-// --- Unit: parseSections ---
+interface RegistryIndexEntry {
+  name: string
+  kind: 'org' | 'person'
+  consentTier: string
+  updated: string
+}
+
+interface RegistryIndex {
+  entries: Record<string, RegistryIndexEntry>
+}
+
+async function readRegistryIndex(): Promise<RegistryIndex> {
+  return JSON.parse(await fs.readFile(path.join(REGISTRY_DIR, 'index.json'), 'utf8'))
+}
+
+async function hasPrebuiltSkillFixture(slug: string): Promise<boolean> {
+  try {
+    const s = await fs.stat(path.join(REGISTRY_DIR, slug, 'skill', `develop-like-${slug}`, 'SKILL.md'))
+    return s.isFile()
+  } catch {
+    return false
+  }
+}
+
+async function findSlugMissingSections(slugs: string[], headings: string[]): Promise<string | undefined> {
+  for (const slug of slugs) {
+    const profile = await fs.readFile(path.join(REGISTRY_DIR, slug, 'profile.md'), 'utf8')
+    if (headings.every((h) => !profile.includes(`## ${h}`))) return slug
+  }
+  return undefined
+}
+
+async function findSlugWithHeading(slugs: string[], heading: string | string[]): Promise<string | undefined> {
+  const headings = Array.isArray(heading) ? heading : [heading]
+  for (const slug of slugs) {
+    const profile = await fs.readFile(path.join(REGISTRY_DIR, slug, 'profile.md'), 'utf8')
+    if (headings.every((h) => new RegExp(`^## ${h}$`, 'm').test(profile))) return slug
+  }
+  return undefined
+}
+
+async function findSlugWithCitation(slugs: string[]): Promise<{ slug: string; label: string; url: string } | undefined> {
+  for (const slug of slugs) {
+    const profile = await fs.readFile(path.join(REGISTRY_DIR, slug, 'profile.md'), 'utf8')
+    const match = /\[\[([^\]]+)\]\]\(([^)]+)\)/.exec(profile)
+    if (match) return { slug, label: match[1], url: match[2] }
+  }
+  return undefined
+}
 
 test('parseSections keys by heading name regardless of order', () => {
   const text = '# Title\n\n## Tensions\nT body\n\n## Core principle\nC body\n'
@@ -36,20 +84,21 @@ test('parseSections keys by heading name regardless of order', () => {
   assert.equal(sections['Core principle'], 'C body')
 })
 
-test('parseSections tolerates missing sections (theo deviation)', async () => {
-  const theoProfile = await fs.readFile(path.join(REGISTRY_DIR, 'theo', 'profile.md'), 'utf8')
-  const sections = parseSections(theoProfile)
+test('parseSections tolerates missing optional sections (real registry entry deviation)', async () => {
+  const index = await readRegistryIndex()
+  const slugs = Object.keys(index.entries)
+  const slug = await findSlugMissingSections(slugs, ['Core principle', 'Workflow shape'])
+  assert.ok(slug, 'expected at least one registry entry missing Core principle / Workflow shape')
+  const profile = await fs.readFile(path.join(REGISTRY_DIR, slug!, 'profile.md'), 'utf8')
+  const sections = parseSections(profile)
   assert.equal(sections['Core principle'], undefined)
   assert.equal(sections['Workflow shape'], undefined)
   assert.ok(sections['Identity'])
   assert.ok(sections['Principles (cited)'])
   assert.ok(sections['Stack'])
-  // theo's heading deviates: "Tensions — read before installing" rather than plain "Tensions".
-  const tensionsKey = Object.keys(sections).find((k) => k.startsWith('Tensions'))
+    const tensionsKey = Object.keys(sections).find((k) => k.startsWith('Tensions'))
   assert.ok(tensionsKey, 'expected a heading starting with "Tensions"')
 })
-
-// --- Unit: normalizeCitations ---
 
 test('normalizeCitations converts [[label]](url) to [label](url)', () => {
   const input = 'See [[CEP]](https://github.com/EveryInc/compound-engineering-plugin) for detail.'
@@ -65,8 +114,6 @@ test('normalizeCitations leaves standard markdown links untouched', () => {
   const input = 'See [normal link](https://example.com) here.'
   assert.equal(normalizeCitations(input), input)
 })
-
-// --- Integration: generate() ---
 
 test('generate() fails loud and writes nothing when validation fails', async () => {
   const outDir = await mktmp()
@@ -93,13 +140,14 @@ test('generate() fails loud and writes nothing when validation fails', async () 
 test('generate() succeeds against the real registry with real validate()', async () => {
   const outDir = await mktmp()
   try {
+    const index = await readRegistryIndex()
     const result = await generate({ registryDir: REGISTRY_DIR, outDir })
     assert.equal(result.ok, true, `generate failed: ${JSON.stringify(result.errors)}`)
     const files = await fs.readdir(outDir)
-    assert.ok(files.includes('index.mdx'))
-    assert.ok(files.includes('every.mdx'))
-    assert.ok(files.includes('oxide.mdx'))
-    assert.ok(files.includes('theo.mdx'))
+    assert.ok(files.includes('index.md'))
+    for (const slug of Object.keys(index.entries)) {
+      assert.ok(files.includes(`${slug}.md`), `expected ${slug}.md to be generated`)
+    }
   } finally {
     await fs.rm(outDir, { recursive: true, force: true })
   }
@@ -108,15 +156,22 @@ test('generate() succeeds against the real registry with real validate()', async
 test('generate() renders entries in registry/index.json key order', async () => {
   const outDir = await mktmp()
   try {
+    const index = await readRegistryIndex()
+    const slugs = Object.keys(index.entries)
+    assert.ok(slugs.length >= 2, 'need at least 2 registry entries to assert ordering')
     const result = await generate({ registryDir: REGISTRY_DIR, outDir })
     assert.equal(result.ok, true)
-    const indexMdx = await fs.readFile(path.join(outDir, 'index.mdx'), 'utf8')
-    const everyPos = indexMdx.indexOf('Every')
-    const oxidePos = indexMdx.indexOf('Oxide')
-    const theoPos = indexMdx.indexOf('Theo Browne')
-    assert.ok(everyPos > -1 && oxidePos > -1 && theoPos > -1)
-    assert.ok(everyPos < oxidePos, 'every must precede oxide (index.json order)')
-    assert.ok(oxidePos < theoPos, 'oxide must precede theo (index.json order)')
+    const indexMdx = await fs.readFile(path.join(outDir, 'index.md'), 'utf8')
+    const positions = slugs.map((slug) => indexMdx.indexOf(index.entries[slug].name))
+    for (const [i, pos] of positions.entries()) {
+      assert.ok(pos > -1, `expected "${index.entries[slugs[i]].name}" to appear in index.md`)
+    }
+    for (let i = 1; i < positions.length; i++) {
+      assert.ok(
+        positions[i - 1] < positions[i],
+        `${slugs[i - 1]} must precede ${slugs[i]} (index.json order)`,
+      )
+    }
   } finally {
     await fs.rm(outDir, { recursive: true, force: true })
   }
@@ -125,12 +180,14 @@ test('generate() renders entries in registry/index.json key order', async () => 
 test('generate() emits Starlight frontmatter with title and description', async () => {
   const outDir = await mktmp()
   try {
+    const index = await readRegistryIndex()
+    const [firstSlug] = Object.keys(index.entries)
     const result = await generate({ registryDir: REGISTRY_DIR, outDir })
     assert.equal(result.ok, true)
-    const everyMdx = await fs.readFile(path.join(outDir, 'every.mdx'), 'utf8')
-    assert.match(everyMdx, /^---\ntitle:/)
-    assert.match(everyMdx, /\ndescription:/)
-    assert.match(everyMdx, /\n---\n/)
+    const mdx = await fs.readFile(path.join(outDir, `${firstSlug}.md`), 'utf8')
+    assert.match(mdx, /^---\ntitle:/)
+    assert.match(mdx, /\ndescription:/)
+    assert.match(mdx, /\n---\n/)
   } finally {
     await fs.rm(outDir, { recursive: true, force: true })
   }
@@ -139,18 +196,19 @@ test('generate() emits Starlight frontmatter with title and description', async 
 test('generate() emits a Starlight custom slug so output routes under /registry/ despite living in _generated/', async () => {
   const outDir = await mktmp()
   try {
+    const index = await readRegistryIndex()
     const result = await generate({ registryDir: REGISTRY_DIR, outDir })
     assert.equal(result.ok, true)
 
-    const indexMdx = await fs.readFile(path.join(outDir, 'index.mdx'), 'utf8')
-    assert.match(indexMdx, /\nslug: registry\n/, 'index.mdx must declare slug: registry')
+    const indexMdx = await fs.readFile(path.join(outDir, 'index.md'), 'utf8')
+    assert.match(indexMdx, /\nslug: registry\n/, 'index.md must declare slug: registry')
 
-    for (const slug of ['every', 'oxide', 'theo']) {
-      const mdx = await fs.readFile(path.join(outDir, `${slug}.mdx`), 'utf8')
+    for (const slug of Object.keys(index.entries)) {
+      const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
       assert.match(
         mdx,
         new RegExp(`\\nslug: registry/${slug}\\n`),
-        `${slug}.mdx must declare slug: registry/${slug}`,
+        `${slug}.md must declare slug: registry/${slug}`,
       )
     }
   } finally {
@@ -161,27 +219,38 @@ test('generate() emits a Starlight custom slug so output routes under /registry/
 test('generate() includes consent tier, source count, and updated date for each entry', async () => {
   const outDir = await mktmp()
   try {
+    const index = await readRegistryIndex()
+    const slugs = Object.keys(index.entries)
     const result = await generate({ registryDir: REGISTRY_DIR, outDir })
     assert.equal(result.ok, true)
-    const oxideEntry = JSON.parse(
-      await fs.readFile(path.join(REGISTRY_DIR, 'oxide', 'entry.json'), 'utf8'),
-    )
-    const oxideMdx = await fs.readFile(path.join(outDir, 'oxide.mdx'), 'utf8')
-    assert.ok(oxideMdx.includes(oxideEntry.consentTier))
-    assert.ok(oxideMdx.includes(oxideEntry.updated))
-    assert.ok(oxideMdx.includes(String(oxideEntry.sources.length)))
+    for (const slug of slugs) {
+      const entry = JSON.parse(
+        await fs.readFile(path.join(REGISTRY_DIR, slug, 'entry.json'), 'utf8'),
+      )
+      const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
+      assert.ok(mdx.includes(entry.consentTier), `${slug}: missing consentTier`)
+      assert.ok(mdx.includes(entry.updated), `${slug}: missing updated date`)
+      assert.ok(mdx.includes(String(entry.sources.length)), `${slug}: missing source count`)
+    }
   } finally {
     await fs.rm(outDir, { recursive: true, force: true })
   }
 })
 
-test('generate() shows npx dev-like <slug> and SKILL.md link for prebuilt entries (every, oxide)', async () => {
+test('generate() shows npx dev-like <slug> and SKILL.md link for prebuilt entries', async () => {
   const outDir = await mktmp()
   try {
+    const index = await readRegistryIndex()
+    const prebuiltSlugs: string[] = []
+    for (const slug of Object.keys(index.entries)) {
+      if (await hasPrebuiltSkillFixture(slug)) prebuiltSlugs.push(slug)
+    }
+    assert.ok(prebuiltSlugs.length > 0, 'expected at least one prebuilt-skill fixture entry')
+
     const result = await generate({ registryDir: REGISTRY_DIR, outDir })
     assert.equal(result.ok, true)
-    for (const slug of ['every', 'oxide']) {
-      const mdx = await fs.readFile(path.join(outDir, `${slug}.mdx`), 'utf8')
+    for (const slug of prebuiltSlugs) {
+      const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
       assert.ok(mdx.includes(`npx dev-like ${slug}`), `${slug}: missing npx install command`)
       assert.ok(
         mdx.includes(`registry/${slug}/skill/develop-like-${slug}/SKILL.md`),
@@ -193,61 +262,113 @@ test('generate() shows npx dev-like <slug> and SKILL.md link for prebuilt entrie
   }
 })
 
-test('generate() shows /dev-like theo generation instruction for theo (no prebuilt skill)', async () => {
+test('generate() shows /dev-like <slug> generation instruction for entries with no prebuilt skill', async () => {
   const outDir = await mktmp()
   try {
+    const index = await readRegistryIndex()
+    const nonPrebuiltSlugs: string[] = []
+    for (const slug of Object.keys(index.entries)) {
+      if (!(await hasPrebuiltSkillFixture(slug))) nonPrebuiltSlugs.push(slug)
+    }
+    assert.ok(nonPrebuiltSlugs.length > 0, 'expected at least one non-prebuilt-skill fixture entry')
+
     const result = await generate({ registryDir: REGISTRY_DIR, outDir })
     assert.equal(result.ok, true)
-    const theoMdx = await fs.readFile(path.join(outDir, 'theo.mdx'), 'utf8')
-    assert.ok(theoMdx.includes('/dev-like theo'))
-    assert.ok(!theoMdx.includes('npx dev-like theo'))
+    for (const slug of nonPrebuiltSlugs) {
+      const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
+      assert.ok(mdx.includes(`/dev-like ${slug}`))
+      assert.ok(!mdx.includes(`npx dev-like ${slug}`))
+    }
   } finally {
     await fs.rm(outDir, { recursive: true, force: true })
   }
 })
 
-test('generate() normalizes citations in generated MDX but leaves source profile.md unchanged', async () => {
+test('generate() normalizes citations in generated Markdown but leaves source profile.md unchanged', async () => {
   const outDir = await mktmp()
   try {
-    const beforeProfile = await fs.readFile(path.join(REGISTRY_DIR, 'every', 'profile.md'), 'utf8')
+    const index = await readRegistryIndex()
+    const found = await findSlugWithCitation(Object.keys(index.entries))
+    assert.ok(found, 'expected at least one registry entry using [[label]](url) citation syntax')
+    const { slug, label, url } = found!
+
+    const beforeProfile = await fs.readFile(path.join(REGISTRY_DIR, slug, 'profile.md'), 'utf8')
     const result = await generate({ registryDir: REGISTRY_DIR, outDir })
     assert.equal(result.ok, true)
-    const afterProfile = await fs.readFile(path.join(REGISTRY_DIR, 'every', 'profile.md'), 'utf8')
+    const afterProfile = await fs.readFile(path.join(REGISTRY_DIR, slug, 'profile.md'), 'utf8')
     assert.equal(beforeProfile, afterProfile, 'source profile.md must not be modified')
 
-    const everyMdx = await fs.readFile(path.join(outDir, 'every.mdx'), 'utf8')
-    assert.ok(!everyMdx.includes('[['), 'generated MDX must not contain raw [[citation]] syntax')
+    const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
+    assert.ok(!mdx.includes('[['), 'generated Markdown must not contain raw [[citation]] syntax')
     assert.ok(
-      everyMdx.includes('[CEP](https://github.com/EveryInc/compound-engineering-plugin)'),
-      'generated MDX must contain normalized citation link',
+      mdx.includes(`[${label}](${url})`),
+      'generated Markdown must contain normalized citation link',
     )
   } finally {
     await fs.rm(outDir, { recursive: true, force: true })
   }
 })
 
-test('generate() renders theo despite missing Core principle / Workflow shape sections', async () => {
+test('generate() renders entries with missing optional sections without error', async () => {
   const outDir = await mktmp()
   try {
+    const index = await readRegistryIndex()
+    const slugs = Object.keys(index.entries)
+    const slug = await findSlugMissingSections(slugs, ['Core principle', 'Workflow shape'])
+    assert.ok(slug, 'expected at least one registry entry missing Core principle / Workflow shape')
+
     const result = await generate({ registryDir: REGISTRY_DIR, outDir })
     assert.equal(result.ok, true)
-    const theoMdx = await fs.readFile(path.join(outDir, 'theo.mdx'), 'utf8')
-    assert.ok(theoMdx.includes('Identity'))
-    assert.ok(theoMdx.includes('Principles (cited)'))
-    assert.ok(theoMdx.includes('Stack'))
-    assert.ok(theoMdx.includes('Tensions'))
+    const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
+    assert.ok(mdx.includes('Identity'))
+    assert.ok(mdx.includes('Principles (cited)'))
+    assert.ok(mdx.includes('Stack'))
+    assert.ok(mdx.includes('Tensions'))
   } finally {
     await fs.rm(outDir, { recursive: true, force: true })
   }
 })
+
+const LONE_BRACE_CASES: [string, string][] = [
+  ['opening', 'Unbalanced { brace with no close.\n\n'],
+  ['closing', 'Unbalanced } brace with no open.\n\n'],
+]
+
+for (const [kind, injected] of LONE_BRACE_CASES) {
+  test(`generate() rejects a profile section containing a lone/unbalanced ${kind} brace`, async () => {
+    const registryDir = await mktmp(`dev-like-docsgen-lonebrace-${kind}-`)
+    const outDir = await mktmp(`dev-like-docsgen-lonebrace-${kind}-out-`)
+    try {
+      await copyRegistryFixture(registryDir)
+      const index = await readRegistryIndex()
+      const slug = await findSlugWithHeading(Object.keys(index.entries), 'Tensions')
+      assert.ok(slug, 'expected at least one registry entry with a "## Tensions" section')
+      const slugDir = path.join(registryDir, slug!)
+      const original = await fs.readFile(path.join(slugDir, 'profile.md'), 'utf8')
+      const tampered = original.replace(/(## Tensions\n)/, `$1${injected}`)
+      assert.notEqual(tampered, original, `expected to inject a lone ${kind} brace into Tensions`)
+      await fs.writeFile(path.join(slugDir, 'profile.md'), tampered, 'utf8')
+
+      await assert.rejects(
+        generate({ registryDir, outDir, validateFn: async () => true }),
+        new RegExp(`(${slug}.*Tensions.*MDX expression|MDX expression.*${slug}.*Tensions)`, 'is'),
+      )
+    } finally {
+      await fs.rm(registryDir, { recursive: true, force: true })
+      await fs.rm(outDir, { recursive: true, force: true })
+    }
+  })
+}
 
 test('generate() renders a fixture with reordered profile headings without error', async () => {
   const registryDir = await mktmp('dev-like-docsgen-reorder-')
   const outDir = await mktmp('dev-like-docsgen-reorder-out-')
   try {
     await copyRegistryFixture(registryDir)
-    // Reorder: put Tensions before Core principle / Workflow shape / Stack.
-    const slugDir = path.join(registryDir, 'every')
+    const index = await readRegistryIndex()
+    const slug = await findSlugWithHeading(Object.keys(index.entries), ['Tensions', 'Core principle'])
+    assert.ok(slug, 'expected a registry entry with both "## Tensions" and "## Core principle" sections')
+    const slugDir = path.join(registryDir, slug!)
     const original = await fs.readFile(path.join(slugDir, 'profile.md'), 'utf8')
     const tensionsMatch = /## Tensions\n[\s\S]*?(?=\n## |$)/.exec(original)
     assert.ok(tensionsMatch)
@@ -261,9 +382,9 @@ test('generate() renders a fixture with reordered profile headings without error
       validateFn: async () => true,
     })
     assert.equal(result.ok, true, `generate failed: ${JSON.stringify(result.errors)}`)
-    const everyMdx = await fs.readFile(path.join(outDir, 'every.mdx'), 'utf8')
-    assert.ok(everyMdx.includes('Tensions'))
-    assert.ok(everyMdx.includes('Core principle'))
+    const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
+    assert.ok(mdx.includes('Tensions'))
+    assert.ok(mdx.includes('Core principle'))
   } finally {
     await fs.rm(registryDir, { recursive: true, force: true })
     await fs.rm(outDir, { recursive: true, force: true })
@@ -294,26 +415,22 @@ test('generate() is deterministic across repeated runs', async () => {
   }
 })
 
-// --- CLI integration ---
-
 test('CLI: exits 0 and writes generated output to a given --out directory', async () => {
   const outDir = await mktmp('dev-like-docsgen-cli-')
   const res = spawnSync('bun', [GENERATOR, '--out', outDir], { cwd: DOCS_ROOT, encoding: 'utf8' })
   try {
     assert.equal(res.status, 0, `CLI failed: ${res.stderr}`)
-    assert.ok(fss.existsSync(path.join(outDir, 'index.mdx')))
+    assert.ok(fss.existsSync(path.join(outDir, 'index.md')))
   } finally {
     await fs.rm(outDir, { recursive: true, force: true })
   }
 })
 
 test('generated output path under docs/src/content/docs/_generated is ignored by git', () => {
-  const probe = path.join(DOCS_ROOT, 'src', 'content', 'docs', '_generated', 'index.mdx')
+  const probe = path.join(DOCS_ROOT, 'src', 'content', 'docs', '_generated', 'index.md')
   const res = spawnSync('git', ['check-ignore', '--no-index', probe], { cwd: REPO_ROOT, encoding: 'utf8' })
   assert.equal(res.status, 0, `expected ${probe} to be git-ignored; git check-ignore exit ${res.status}`)
 })
-
-// --- Package script contract ---
 
 test('docs package.json: dev and build scripts generate registry pages before running Astro', async () => {
   const pkg = JSON.parse(await fs.readFile(path.join(DOCS_ROOT, 'package.json'), 'utf8'))

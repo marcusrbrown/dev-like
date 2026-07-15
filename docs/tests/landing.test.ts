@@ -1,19 +1,3 @@
-// RED-phase contract for U3 (plan: docs/plans/2026-07-12-001-feat-docs-site-plan.md, R5/R7/R8/R9/R13).
-// Builds the real Starlight site once with Bun and inspects the rendered HTML output for
-// meaningful behavior — not visual implementation. No runtime dependencies; parsing is done
-// with plain string/regex checks against the built HTML.
-//
-// Contract this test enforces (stable data attributes the eventual markup must expose):
-//   - Exactly one element carries `data-cta="primary"`; its visible text is exactly the
-//     install command `npx skills add marcusrbrown/dev-like`.
-//   - Secondary install paths (CLI, plugin marketplace) and first-run `/dev-like` guidance
-//     are present in the page text but never carry `data-cta="primary"`.
-//   - Before/after evidence uses `data-evidence="before"` / `data-evidence="after"` labels and
-//     links to the raw demo transcript on GitHub.
-//   - The ethics page states public-source-only sourcing, every consent tier, the `stated`
-//     floor for people, versioned-at-generation provenance, the request-profile and opt-out
-//     paths, and the 48-hour response promise.
-
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -21,9 +5,19 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DOCS_ROOT = path.resolve(__dirname, '..')
+const REPO_ROOT = path.resolve(DOCS_ROOT, '..')
+const REGISTRY_INDEX = path.join(REPO_ROOT, 'registry', 'index.json')
 const DIST_DIR = path.join(DOCS_ROOT, 'dist')
 const LANDING_HTML = path.join(DIST_DIR, 'index.html')
 const ETHICS_HTML = path.join(DIST_DIR, 'ethics', 'index.html')
+const REGISTRY_HTML = path.join(DIST_DIR, 'registry', 'index.html')
+
+function extractSidebarHtml(html: string): string {
+  const start = html.indexOf('<ul class="top-level')
+  const end = html.indexOf('<script aria-hidden', start)
+  if (start === -1 || end === -1) return ''
+  return html.slice(start, end)
+}
 
 const PRIMARY_CTA_ATTR = /data-cta="primary"/g
 const RAW_DEMO_LINK =
@@ -48,9 +42,7 @@ beforeAll(() => {
   if (existsSync(ETHICS_HTML)) ethicsHtml = readFileSync(ETHICS_HTML, 'utf8')
 }, 60_000)
 
-afterAll(() => {
-  // Leave dist/ in place for inspection; the build step is disposable and re-run on demand.
-})
+afterAll(() => {})
 
 describe('docs site build', () => {
   test('the site builds successfully with Bun', () => {
@@ -58,7 +50,7 @@ describe('docs site build', () => {
   })
 })
 
-describe('landing route (R5, R8, R13)', () => {
+describe('landing route', () => {
   test('the /dev-like/ landing route exists in build output', () => {
     expect(existsSync(LANDING_HTML), `expected build output at ${LANDING_HTML}`).toBe(true)
   })
@@ -88,10 +80,16 @@ describe('landing route (R5, R8, R13)', () => {
 
   test('secondary CLI and plugin install paths are present but not marked primary', () => {
     expect(landingHtml).toContain('npx dev-like')
-    // Plugin marketplace path referenced by name; must not carry the primary marker.
     const secondaryCliMatch = /<[^>]*>[^<]*npx dev-like[^<]*<\/[^>]+>/.exec(landingHtml)
     expect(secondaryCliMatch, 'expected a rendered element containing the CLI install path').not.toBeNull()
     expect(secondaryCliMatch?.[0]).not.toContain('data-cta="primary"')
+  })
+
+  test('secondary install commands have accessible copy controls and correct tracking events', () => {
+    expect(landingHtml).toContain('data-umami-event="install-plugin-marketplace"')
+    expect(landingHtml).toContain('data-umami-event="install-plugin-direct"')
+    expect(landingHtml).toContain('data-umami-event="install-cli-cached"')
+    expect(landingHtml).toMatch(/<button[^>]*data-copy-button[^>]*>/)
   })
 
   test('first-run /dev-like guidance is present but not marked primary', () => {
@@ -100,13 +98,21 @@ describe('landing route (R5, R8, R13)', () => {
     expect(firstRunMatch?.[0]).not.toContain('data-cta="primary"')
   })
 
-  test('before and after evidence labels are present', () => {
+  test('before and after evidence labels and neutral headers are present', () => {
     expect(landingHtml).toMatch(/data-evidence="before"/)
     expect(landingHtml).toMatch(/data-evidence="after"/)
+    expect(landingHtml).toContain('With Every profile')
   })
 
   test('a link to the verified raw demo transcript is present', () => {
     expect(landingHtml).toContain(RAW_DEMO_LINK)
+  })
+
+  test('internal registry and ethics links use canonical trailing-slash URLs', () => {
+    expect(landingHtml).toContain('href="/dev-like/registry/"')
+    expect(landingHtml).not.toMatch(/href="\/dev-like\/registry"[^/]/)
+    expect(landingHtml).toContain('href="/dev-like/ethics/"')
+    expect(landingHtml).not.toMatch(/href="\/dev-like\/ethics"[^/]/)
   })
 
   test('the [receipt] links are real external HTTPS sources, not local/hash placeholders', () => {
@@ -117,7 +123,7 @@ describe('landing route (R5, R8, R13)', () => {
   })
 })
 
-describe('ethics route (R9)', () => {
+describe('ethics route', () => {
   test('the /dev-like/ethics/ route exists in build output', () => {
     expect(existsSync(ETHICS_HTML), `expected build output at ${ETHICS_HTML}`).toBe(true)
   })
@@ -154,7 +160,6 @@ describe('ethics route (R9)', () => {
 
   test('describes self-published accurately: the subject ships its own culture artifacts (DESIGN.md:84)', () => {
     expect(ethicsHtml.toLowerCase()).toMatch(/subject ships (its|their) own culture artifacts/)
-    // Must not be conflated with dev-like itself publishing the profile.
     expect(ethicsHtml.toLowerCase()).not.toMatch(/self-published[\s\S]{0,80}publish(es)? a dev-like profile/)
   })
 
@@ -162,5 +167,64 @@ describe('ethics route (R9)', () => {
     expect(ethicsHtml).toContain(
       'https://github.com/marcusrbrown/dev-like/blob/main/registry/OPTOUT.md',
     )
+  })
+})
+
+describe('registry sidebar navigation', () => {
+  test('the sidebar group is explicitly labeled "Registry" and does not expose the raw "_generated" directory name', () => {
+    expect(existsSync(REGISTRY_HTML), `expected build output at ${REGISTRY_HTML}`).toBe(true)
+    const registryHtml = readFileSync(REGISTRY_HTML, 'utf8')
+    const sidebar = extractSidebarHtml(registryHtml)
+    expect(sidebar).not.toBe('')
+    expect(sidebar).not.toContain('_generated')
+    expect(sidebar).toMatch(/class="group-label[^"]*"[^>]*>\s*<span[^>]*>Registry</)
+  })
+
+  test('the sidebar links Ethics & Consent to /dev-like/ethics/', () => {
+    const registryHtml = readFileSync(REGISTRY_HTML, 'utf8')
+    const sidebar = extractSidebarHtml(registryHtml)
+    expect(sidebar).toContain('href="/dev-like/ethics/"')
+    expect(sidebar).toContain('Ethics &amp; Consent')
+  })
+
+  test('the sidebar links the registry overview and every current registry entry, read dynamically from registry/index.json', () => {
+    const registryHtml = readFileSync(REGISTRY_HTML, 'utf8')
+    const sidebar = extractSidebarHtml(registryHtml)
+
+    expect(sidebar).toContain('href="/dev-like/registry/"')
+
+    const index: { entries: Record<string, { name: string }> } = JSON.parse(
+      readFileSync(REGISTRY_INDEX, 'utf8'),
+    )
+    for (const [slug, entry] of Object.entries(index.entries)) {
+      expect(sidebar, `expected sidebar link for slug "${slug}"`).toContain(
+        `href="/dev-like/registry/${slug}/"`,
+      )
+      expect(sidebar, `expected sidebar label for slug "${slug}"`).toContain(entry.name)
+    }
+  })
+})
+
+describe('registry index table rendering (remark-gfm regression)', () => {
+  test('the registry overview renders a real <table> with a link for every current registry entry, not raw markdown pipe-row text', () => {
+    const registryHtml = readFileSync(REGISTRY_HTML, 'utf8')
+
+    expect(registryHtml).toMatch(/<table>/)
+    expect(registryHtml).not.toMatch(/\|\s*Name\s*\|\s*Kind\s*\|/)
+    expect(registryHtml).not.toMatch(/\|\s*---\s*\|\s*---\s*\|/)
+
+    const tableMatch = /<table>[\s\S]*?<\/table>/.exec(registryHtml)
+    expect(tableMatch, 'expected a rendered <table> in the registry overview').not.toBeNull()
+    const tableHtml = tableMatch?.[0] ?? ''
+
+    const index: { entries: Record<string, { name: string }> } = JSON.parse(
+      readFileSync(REGISTRY_INDEX, 'utf8'),
+    )
+    for (const [slug, entry] of Object.entries(index.entries)) {
+      expect(tableHtml, `expected table link for slug "${slug}"`).toContain(
+        `href="/dev-like/registry/${slug}/"`,
+      )
+      expect(tableHtml, `expected table label for slug "${slug}"`).toContain(entry.name)
+    }
   })
 })

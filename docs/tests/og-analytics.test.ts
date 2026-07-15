@@ -1,13 +1,10 @@
-// RED-phase contract for U4 (plan: docs/plans/2026-07-12-001-feat-docs-site-plan.md, R10/R11/R11a).
-// Builds the real Starlight site with Bun (toggling UMAMI_WEBSITE_ID between runs) and
-// inspects `docs/dist/` output. No mocking of astro-og-canvas or Starlight route middleware —
-// this proves rendered behavior, not implementation shape.
-
 import { describe, expect, test } from 'bun:test'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { buildAnalyticsTag } from '../src/lib/analytics'
+import { buildDefaultImageOptions, buildEntryImageOptions, OG_VISUAL_OPTIONS } from '../src/lib/og-image'
 import { loadRegistryOgPages } from '../src/lib/registry-og'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -29,10 +26,7 @@ function build(env: Record<string, string>): { ok: boolean; stderr: string } {
   const result = Bun.spawnSync({
     cmd: ['bun', 'run', 'build'],
     cwd: DOCS_ROOT,
-    // `bun test` sets NODE_ENV=test in its own process env; spreading process.env into the
-    // child would leak that into `astro build` and disable `import.meta.env.PROD`, which is
-    // exactly the flag the Umami gate depends on. Force a real production build here so the
-    // test exercises actual production behavior, not a test-mode artifact.
+    // Force production build: bun test sets NODE_ENV=test, which would leak into astro build and disable import.meta.env.PROD.
     env: { ...process.env, ...env, NODE_ENV: 'production' },
     stdout: 'pipe',
     stderr: 'pipe',
@@ -61,7 +55,7 @@ describe('loadRegistryOgPages() working-directory independence', () => {
   })
 })
 
-describe('loadRegistryOgPages() data completeness (R10)', () => {
+describe('loadRegistryOgPages() data completeness', () => {
   test('every entry OG payload includes name, exact summary, source count, and consent tier', async () => {
     const pages = await loadRegistryOgPages()
 
@@ -73,8 +67,6 @@ describe('loadRegistryOgPages() data completeness (R10)', () => {
 
       const serialized = JSON.stringify(page)
       expect(serialized, `${slug}: missing name`).toContain(entry.name)
-      // entry.json `summary` is optional (e.g. theo); when absent the loader falls back to a
-      // generated one-liner, so assert against whichever the real registry data supplies.
       const expectedSummary = entry.summary ?? `${entry.name} engineering culture profile.`
       expect(serialized, `${slug}: missing exact summary "${expectedSummary}"`).toContain(expectedSummary)
       expect(serialized, `${slug}: missing source count ${entry.sources.length}`).toContain(
@@ -85,7 +77,7 @@ describe('loadRegistryOgPages() data completeness (R10)', () => {
   })
 })
 
-describe('per-entry OG data and routes (R10)', () => {
+describe('per-entry OG data and routes', () => {
   test('the build succeeds without an analytics website ID', () => {
     const { ok, stderr } = build({ UMAMI_WEBSITE_ID: '' })
     expect(ok, `docs build failed:\n${stderr}`).toBe(true)
@@ -149,7 +141,54 @@ describe('per-entry OG data and routes (R10)', () => {
   })
 })
 
-describe('Umami analytics gating (R11)', () => {
+describe('buildAnalyticsTag() (pure)', () => {
+  test('a configured website ID in development returns no script', () => {
+    expect(buildAnalyticsTag(FIXTURE_WEBSITE_ID, false)).toBeUndefined()
+  })
+
+  test('no website ID in production returns no script', () => {
+    expect(buildAnalyticsTag(undefined, true)).toBeUndefined()
+    expect(buildAnalyticsTag('', true)).toBeUndefined()
+  })
+
+  test('a configured website ID in production returns the metrics.fro.bot privacy-attributed tag', () => {
+    const tag = buildAnalyticsTag(FIXTURE_WEBSITE_ID, true)
+    expect(tag).toBeDefined()
+    expect(tag?.tag).toBe('script')
+    expect(tag?.attrs.src).toBe('https://metrics.fro.bot/script.js')
+    expect(tag?.attrs.defer).toBe(true)
+    expect(tag?.attrs['data-website-id']).toBe(FIXTURE_WEBSITE_ID)
+    expect(tag?.attrs['data-do-not-track']).toBe('true')
+    expect(tag?.attrs['data-exclude-search']).toBe('true')
+    expect(tag?.attrs['data-exclude-hash']).toBe('true')
+  })
+})
+
+describe('OG image options builders (pure)', () => {
+  test('buildDefaultImageOptions() reaches the shared visual options and site title', () => {
+    const options = buildDefaultImageOptions()
+    expect(options.title).toBe('dev-like')
+    expect(options.description).toContain('Steal the workflow, not the code.')
+    expect(options.bgGradient).toEqual(OG_VISUAL_OPTIONS.bgGradient)
+    expect(options.border).toEqual(OG_VISUAL_OPTIONS.border)
+    expect(options.padding).toBe(OG_VISUAL_OPTIONS.padding)
+    expect(options.font).toEqual(OG_VISUAL_OPTIONS.font)
+  })
+
+  test('buildEntryImageOptions() surfaces title, summary, consent tier, and source count, and reaches shared visual options', () => {
+    const page = { title: 'Acme Corp', summary: 'Acme engineering culture profile.', meta: 'stated · 3 sources' }
+    const options = buildEntryImageOptions(page)
+    expect(options.title).toBe('Acme Corp')
+    expect(options.description).toContain('Acme engineering culture profile.')
+    expect(options.description).toContain('stated · 3 sources')
+    expect(options.bgGradient).toEqual(OG_VISUAL_OPTIONS.bgGradient)
+    expect(options.border).toEqual(OG_VISUAL_OPTIONS.border)
+    expect(options.padding).toBe(OG_VISUAL_OPTIONS.padding)
+    expect(options.font).toEqual(OG_VISUAL_OPTIONS.font)
+  })
+})
+
+describe('Umami analytics gating', () => {
   test('a production build with a fixture website ID includes the script and ID', () => {
     const { ok, stderr } = build({ UMAMI_WEBSITE_ID: FIXTURE_WEBSITE_ID })
     expect(ok, `docs build failed:\n${stderr}`).toBe(true)
@@ -171,11 +210,14 @@ describe('Umami analytics gating (R11)', () => {
   }, 60_000)
 })
 
-describe('U3 CTA event attributes remain intact (R11a)', () => {
+describe('CTA event attributes remain intact', () => {
   test('install, request-profile, and opt-out CTA events are present', () => {
     const landingHtml = readFileSync(path.join(DIST_DIR, 'index.html'), 'utf8')
     const ethicsHtml = readFileSync(path.join(DIST_DIR, 'ethics', 'index.html'), 'utf8')
     expect(landingHtml).toContain('data-umami-event="install-primary"')
+    expect(landingHtml).toContain('data-umami-event="install-plugin-marketplace"')
+    expect(landingHtml).toContain('data-umami-event="install-plugin-direct"')
+    expect(landingHtml).toContain('data-umami-event="install-cli-cached"')
     expect(landingHtml).toContain('data-umami-event="request-profile"')
     expect(ethicsHtml).toContain('data-umami-event="request-profile"')
     expect(ethicsHtml).toContain('data-umami-event="opt-out"')

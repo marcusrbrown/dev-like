@@ -1,10 +1,8 @@
 #!/usr/bin/env bun
-// Rendered-site route/asset integrity checker: walks docs/dist/ for internal link/asset rot.
-// Usage: bun docs/scripts/check-internal-links.ts [--dist <dir>] [--base </dev-like>] [--registry <dir>]
 
 import { readFile, readdir, stat } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { dirname, join, relative, resolve as resolvePath, posix } from 'node:path'
+import { dirname, join, posix, relative, resolve as resolvePath } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const DOCS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -14,8 +12,8 @@ const DEFAULT_BASE = '/dev-like'
 const DEFAULT_REGISTRY_DIR = join(REPO_ROOT, 'registry')
 const SITE_ORIGIN = 'https://mrbro.dev'
 
-const REF_ATTR_RE = /\s(?:href|src)="([^"]*)"/g
-const SRCSET_ATTR_RE = /\ssrcset="([^"]*)"/g
+const REF_ATTR_RE = /\s(?:href|src)=(?:"([^"]*)"|'([^']*)')/g
+const SRCSET_ATTR_RE = /\ssrcset=(?:"([^"]*)"|'([^']*)')/g
 
 export interface LinkIssue {
   file: string
@@ -51,6 +49,10 @@ async function walkHtmlFiles(dir: string): Promise<string[]> {
     else if (name.endsWith('.html')) out.push(full)
   }
   return out
+}
+
+function posixify(p: string): string {
+  return p.split('\\').join('/')
 }
 
 function stripQueryAndFragment(ref: string): string {
@@ -90,21 +92,20 @@ function classifyRef(ref: string, base: string, pageDistDir: string): Classifica
   }
 
   if (ref.startsWith('//')) return { kind: 'skip' }
-  if (/^[a-z][a-z0-9+.-]*:/i.test(ref)) return classifyPathname(ref, base) // e.g. javascript: — not a supported skip scheme
+  if (/^[a-z][a-z0-9+.-]*:/i.test(ref)) return classifyPathname(ref, base)
 
   const stripped = stripQueryAndFragment(ref)
   if (stripped === '') return { kind: 'skip' }
 
   if (stripped.startsWith('/')) return classifyPathname(stripped, base)
 
-  // Relative reference: resolve against the referring page's own site-relative directory.
-  const pageUrlPath = `${base}${pageDistDir === '.' ? '' : `/${pageDistDir}`}/`
-  const resolved = resolvePath(pageUrlPath, stripped)
+  // Resolve using POSIX URL-path semantics, not platform filesystem semantics, for cross-platform consistency.
+  const pageUrlPath = `${base}${pageDistDir === '.' ? '' : `/${posixify(pageDistDir)}`}/`
+  const resolved = posix.resolve(pageUrlPath, stripped)
   return classifyPathname(resolved, base)
 }
 
 function classifyPathname(pathname: string, base: string): Classification {
-  // Normalize ".."/"." segments before comparing against base so traversal cannot escape it.
   const normalized = posix.normalize(pathname)
   if (normalized === base || normalized.startsWith(`${base}/`)) {
     const subPath = normalized === base ? '/' : normalized.slice(base.length)
@@ -151,9 +152,9 @@ export async function checkInternalLinks(opts: CheckOptions): Promise<CheckResul
     const text = await readFile(file, 'utf8')
 
     const refs: string[] = []
-    for (const m of text.matchAll(REF_ATTR_RE)) refs.push(m[1]!)
+    for (const m of text.matchAll(REF_ATTR_RE)) refs.push((m[1] ?? m[2])!)
     for (const m of text.matchAll(SRCSET_ATTR_RE)) {
-      for (const entry of m[1]!.split(',')) {
+      for (const entry of (m[1] ?? m[2])!.split(',')) {
         const url = entry.trim().split(/\s+/)[0]
         if (url) refs.push(url)
       }
@@ -176,6 +177,18 @@ export async function checkInternalLinks(opts: CheckOptions): Promise<CheckResul
       const targetFile = resolveDistFile(distDir, classification.pathname)
       if (!existsSync(targetFile)) {
         issues.push({ file: relFile, ref, reason: `missing target: ${targetFile}` })
+        continue
+      }
+
+      const s = classification.pathname
+      const lastSegment = s.split('/').pop() ?? ''
+      const hasExtension = /\.[a-zA-Z0-9]+$/.test(lastSegment)
+      if (!hasExtension && !s.endsWith('/')) {
+        issues.push({
+          file: relFile,
+          ref,
+          reason: `missing trailing slash: directory route "${s}" must be referenced as "${s}/"`,
+        })
       }
     }
   }

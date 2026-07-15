@@ -1,6 +1,3 @@
-// Fixture-based tests for docs/scripts/check-internal-links.ts (plan U5, R2/R6/R7, AE1-AE6).
-// Fixtures are built directories under a temp dir; docs/dist/ is never touched by these tests.
-
 import { afterEach, describe, expect, test } from 'bun:test'
 import { spawnSync } from 'node:child_process'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
@@ -95,11 +92,11 @@ describe('checkInternalLinks() fixtures', () => {
     expect(result.issues.some((i) => i.ref === '/dev-like/img/missing.png')).toBe(true)
   })
 
-  test('error path: a base-path escape (/registry/oxide/ instead of /dev-like/registry/oxide/) is reported', async () => {
+  test('error path: a base-path escape (/registry/example-team/ instead of /dev-like/registry/example-team/) is reported', async () => {
     const distDir = await mktmp()
     const registryDir = await mktmp()
     await writeFixtureRegistry(registryDir, [])
-    await writeHtml(distDir, 'index.html', '<a href="/registry/oxide/">oxide</a>')
+    await writeHtml(distDir, 'index.html', '<a href="/registry/example-team/">example-team</a>')
     await writeFile(path.join(distDir, 'og-image.png'), 'x')
     await mkdir(path.join(distDir, 'ethics'), { recursive: true })
     await writeFile(path.join(distDir, 'ethics', 'index.html'), 'ok')
@@ -108,7 +105,7 @@ describe('checkInternalLinks() fixtures', () => {
 
     const result = await checkInternalLinks({ distDir, registryDir })
     expect(result.ok).toBe(false)
-    const issue = result.issues.find((i) => i.ref === '/registry/oxide/')
+    const issue = result.issues.find((i) => i.ref === '/registry/example-team/')
     expect(issue, JSON.stringify(result.issues)).toBeDefined()
     expect(issue!.reason).toContain('base-path escape')
   })
@@ -134,6 +131,87 @@ describe('checkInternalLinks() fixtures', () => {
     expect(result.ok, JSON.stringify(result.issues)).toBe(true)
   })
 
+  test('single-quoted href, src, and srcset references escaping /dev-like/ are caught', async () => {
+    const distDir = await mktmp()
+    const registryDir = await mktmp()
+    await writeFixtureRegistry(registryDir, [])
+    await writeHtml(distDir, 'index.html', `
+      <a href='/registry/example-team/'>example-team</a>
+      <img src='/img/missing.png'/>
+      <img srcset='/img/missing-2x.png 2x, /img/missing-1x.png 1x'/>
+    `)
+    await writeFile(path.join(distDir, 'og-image.png'), 'x')
+    await mkdir(path.join(distDir, 'ethics'), { recursive: true })
+    await writeFile(path.join(distDir, 'ethics', 'index.html'), 'ok')
+    await mkdir(path.join(distDir, 'registry'), { recursive: true })
+    await writeFile(path.join(distDir, 'registry', 'index.html'), 'ok')
+
+    const result = await checkInternalLinks({ distDir, registryDir })
+    expect(result.ok, JSON.stringify(result.issues)).toBe(false)
+    const refs = result.issues.map((i) => i.ref)
+    expect(refs).toContain('/registry/example-team/')
+    expect(refs).toContain('/img/missing.png')
+    expect(refs).toContain('/img/missing-2x.png')
+    expect(refs).toContain('/img/missing-1x.png')
+  })
+
+  test('a nested relative URL resolves using POSIX semantics regardless of host platform', async () => {
+    const distDir = await mktmp()
+    const registryDir = await mktmp()
+    await writeFixtureRegistry(registryDir, [])
+    await writeHtml(distDir, 'a/b/page.html', '<a href="../sibling/target.html">sibling</a>')
+    await writeHtml(distDir, 'a/sibling/target.html', '<p>ok</p>')
+    await writeFile(path.join(distDir, 'og-image.png'), 'x')
+    await mkdir(path.join(distDir, 'ethics'), { recursive: true })
+    await writeFile(path.join(distDir, 'ethics', 'index.html'), 'ok')
+    await mkdir(path.join(distDir, 'registry'), { recursive: true })
+    await writeFile(path.join(distDir, 'registry', 'index.html'), 'ok')
+    await writeFile(path.join(distDir, 'index.html'), '<p>ok</p>')
+
+    const result = await checkInternalLinks({ distDir, registryDir })
+    expect(result.ok, JSON.stringify(result.issues)).toBe(true)
+  })
+
+  test('a directory-resolving internal reference without a trailing slash fails (trailingSlash: always)', async () => {
+    const distDir = await mktmp()
+    const registryDir = await mktmp()
+    await writeFixtureRegistry(registryDir, [])
+    await writeHtml(distDir, 'index.html', '<a href="/dev-like/registry">registry, no trailing slash</a>')
+    await writeFile(path.join(distDir, 'og-image.png'), 'x')
+    await mkdir(path.join(distDir, 'ethics'), { recursive: true })
+    await writeFile(path.join(distDir, 'ethics', 'index.html'), 'ok')
+    await mkdir(path.join(distDir, 'registry'), { recursive: true })
+    await writeFile(path.join(distDir, 'registry', 'index.html'), 'ok')
+
+    const result = await checkInternalLinks({ distDir, registryDir })
+    expect(result.ok, JSON.stringify(result.issues)).toBe(false)
+    const issue = result.issues.find((i) => i.ref === '/dev-like/registry')
+    expect(issue, JSON.stringify(result.issues)).toBeDefined()
+    expect(issue!.reason).toContain('trailing slash')
+  })
+
+  test('assets, files with extensions, and fragment-only references are unaffected by the trailing-slash rule', async () => {
+    const distDir = await mktmp()
+    const registryDir = await mktmp()
+    await writeFixtureRegistry(registryDir, [])
+    await writeHtml(distDir, 'index.html', `
+      <a href="/dev-like/about.html">about</a>
+      <a href="#top">fragment only</a>
+      <img src="/dev-like/img/logo.png"/>
+    `)
+    await writeHtml(distDir, 'about.html', '<p>ok</p>')
+    await writeFile(path.join(distDir, 'og-image.png'), 'x')
+    await mkdir(path.join(distDir, 'ethics'), { recursive: true })
+    await writeFile(path.join(distDir, 'ethics', 'index.html'), 'ok')
+    await mkdir(path.join(distDir, 'registry'), { recursive: true })
+    await writeFile(path.join(distDir, 'registry', 'index.html'), 'ok')
+    await mkdir(path.join(distDir, 'img'), { recursive: true })
+    await writeFile(path.join(distDir, 'img', 'logo.png'), 'x')
+
+    const result = await checkInternalLinks({ distDir, registryDir })
+    expect(result.ok, JSON.stringify(result.issues)).toBe(true)
+  })
+
   test('every registry slug from a fixture index.json requires a built page and OG image, without hardcoding slugs', async () => {
     const distDir = await mktmp()
     const registryDir = await mktmp()
@@ -144,7 +222,6 @@ describe('checkInternalLinks() fixtures', () => {
     await writeFile(path.join(distDir, 'ethics', 'index.html'), 'ok')
     await mkdir(path.join(distDir, 'registry'), { recursive: true })
     await writeFile(path.join(distDir, 'registry', 'index.html'), 'ok')
-    // Deliberately omit alpha/beta pages and OG images.
 
     const result = await checkInternalLinks({ distDir, registryDir })
     expect(result.ok).toBe(false)

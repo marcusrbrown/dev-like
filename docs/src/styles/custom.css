@@ -43,12 +43,10 @@ code, kbd, pre, samp {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-/* Remove default hero bottom padding for precise gap control */
 .hero {
   padding-bottom: 0 !important;
 }
 
-/* Reorder Hero: Title -> Actions -> Tagline */
 .hero .copy {
   display: contents;
 }
@@ -90,6 +88,21 @@ code, kbd, pre, samp {
   padding-top: 3rem;
 }
 
+.grid-layout > * {
+  min-width: 0;
+}
+
+.command-block-wrapper {
+  position: relative;
+  margin: 0.5rem 0 1rem;
+  min-width: 0;
+}
+
+.command-block-wrapper .command-block {
+  padding-right: 6rem;
+  margin: 0;
+}
+
 .command-block {
   display: block;
   background-color: var(--sl-color-bg-inline-code);
@@ -101,6 +114,27 @@ code, kbd, pre, samp {
   color: var(--sl-color-text);
   overflow-x: auto;
   white-space: nowrap;
+}
+
+.copy-button {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid var(--sl-color-gray-2);
+  color: var(--sl-color-gray-2);
+  padding: 0.25rem 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.copy-button:hover,
+.copy-button:focus-visible {
+  color: var(--accent-highlighter);
+  border-color: var(--accent-highlighter);
 }
 
 @media (max-width: 768px) {
@@ -174,7 +208,7 @@ a[data-cta="primary"]:focus-visible {
     animation: none;
     clip-path: none;
   }
-  .receipt-highlight, .provenance-link, a[data-cta="primary"], .transcript-link a {
+  .receipt-highlight, .provenance-link, a[data-cta="primary"], .transcript-link a, .copy-button {
     transition: none !important;
   }
 }

@@ -1,8 +1,6 @@
-// Contract test for .github/workflows/site.yaml (plan U6): asserts triggers, SHA-pinned
-// actions, job separation/permissions, ordering, concurrency, and stub removal.
-
 import { describe, expect, test } from 'bun:test'
 import { existsSync } from 'node:fs'
+
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'

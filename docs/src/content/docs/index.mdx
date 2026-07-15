@@ -13,6 +13,7 @@ hero:
 ---
 
 import BeforeAfter from '../../components/BeforeAfter.astro';
+import CopyCommand from '../../components/CopyCommand.astro';
 
 <div class="landing-content">
   <section class="proof-section">
@@ -26,11 +27,11 @@ import BeforeAfter from '../../components/BeforeAfter.astro';
     <div class="install-paths">
       <h2>Alternate Install Paths</h2>
       <p>For Claude Code plugins:</p>
-      <div class="command-block">/plugin marketplace add marcusrbrown/dev-like</div>
-      <div class="command-block">/plugin install dev-like</div>
+      <CopyCommand command="/plugin marketplace add marcusrbrown/dev-like" event="install-plugin-marketplace" />
+      <CopyCommand command="/plugin install dev-like" event="install-plugin-direct" />
       
       <p>For cached, headless installations:</p>
-      <div class="command-block">npx dev-like &lt;slug&gt;</div>
+      <CopyCommand command="npx dev-like <slug>" event="install-cli-cached" />
     </div>
 
     <div class="first-run">
@@ -43,7 +44,7 @@ import BeforeAfter from '../../components/BeforeAfter.astro';
 
   <section class="context-section">
     <h2>Registry & Context</h2>
-    <p>Browse the compiled, cited <a href="/dev-like/registry">profiles in the registry</a>. Want a shop profiled? <a href="https://github.com/marcusrbrown/dev-like/issues/new?template=profile-request.yml" data-umami-event="request-profile">Request it</a>.</p>
-    <p>Review the <a href="/dev-like/ethics">ethics and consent guidelines</a> for public-source scoping and opt-out details.</p>
+    <p>Browse the compiled, cited <a href="/dev-like/registry/">profiles in the registry</a>. Want a shop profiled? <a href="https://github.com/marcusrbrown/dev-like/issues/new?template=profile-request.yml" data-umami-event="request-profile">Request it</a>.</p>
+    <p>Review the <a href="/dev-like/ethics/">ethics and consent guidelines</a> for public-source scoping and opt-out details.</p>
   </section>
 </div>
