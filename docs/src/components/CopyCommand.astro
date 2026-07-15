@@ -16,8 +16,11 @@ const { command, event } = Astro.props;
     data-command={command}
     data-umami-event={event}
     aria-label={`Copy command: ${command}`}
+    title="Copy"
   >
-    <span class="copy-text">Copy</span>
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-copy"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-copied" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-failed" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
   </button>
 </div>
 
@@ -51,11 +54,28 @@ const { command, event } = Astro.props;
             }
           }
 
-          const span = button.querySelector('.copy-text');
-          if (span) {
-            span.textContent = success ? 'Copied' : 'Copy failed';
+          const iconCopy = button.querySelector('.icon-copy') as HTMLElement | null;
+          const iconCopied = button.querySelector('.icon-copied') as HTMLElement | null;
+          const iconFailed = button.querySelector('.icon-failed') as HTMLElement | null;
+
+          if (iconCopy && iconCopied && iconFailed) {
+            iconCopy.style.display = 'none';
+            if (success) {
+              iconCopied.style.display = 'block';
+              button.setAttribute('aria-label', 'Copied');
+              button.setAttribute('title', 'Copied');
+            } else {
+              iconFailed.style.display = 'block';
+              button.setAttribute('aria-label', 'Copy failed');
+              button.setAttribute('title', 'Copy failed');
+            }
+
             setTimeout(() => {
-              span.textContent = 'Copy';
+              iconCopied.style.display = 'none';
+              iconFailed.style.display = 'none';
+              iconCopy.style.display = 'block';
+              button.setAttribute('aria-label', `Copy command: ${command}`);
+              button.setAttribute('title', 'Copy');
             }, 2000);
           }
         }
