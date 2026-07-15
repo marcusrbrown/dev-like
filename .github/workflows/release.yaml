@@ -78,3 +78,11 @@ jobs:
           title: 'chore(🦋📦): version packages'
           version: bun run version-changesets
           publish: bun run publish-changesets
+          createGithubReleases: true
+
+      - name: Reconcile alias release tag
+        if: always() && !cancelled()
+        env:
+          GH_TOKEN: ${{ steps.get-app-token.outputs.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: bun run alias-release

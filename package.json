@@ -33,14 +33,15 @@
   "engines": {
     "node": ">=20"
   },
-  "workspaces": ["docs"],
+  "workspaces": ["docs", "."],
   "scripts": {
     "validate": "node scripts/validate.mjs",
     "eval:paired": "node evals/paired/run.mjs",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test tests/*.test.mjs && bun test tests/*.test.ts",
     "prepublishOnly": "bun run validate && bun run test",
     "version-changesets": "changeset version",
-    "publish-changesets": "changeset publish"
+    "publish-changesets": "changeset publish",
+    "alias-release": "bun run .github/scripts/alias-release.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7"

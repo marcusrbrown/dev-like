@@ -38,6 +38,25 @@ trusted publishing with SLSA provenance. Set up for dev-like; verified end-to-en
   `npm publish` (2FA), (2) retool/land the release workflow, (3) configure the trusted
   publisher against the final filename.
 - Gate publishes with `prepublishOnly` running validate + tests.
+- If the publishable npm package is the repository root and `package.json` also declares
+  `workspaces`, include `"."` in that array. Otherwise @manypkg/Changesets only discovers
+  child workspaces and rejects root-package changesets with `package <name> which is not in
+  the workspace`. Prove `bun install --frozen-lockfile` produces zero `bun.lock` diff after
+  the change.
+- Root-as-workspace changes Changesets' tag convention: it now creates canonical
+  `<package>@<version>` tags/releases instead of root-mode `v<version>` ones. If the project
+  has an established `v<version>` public tag convention, decide explicitly whether to migrate
+  or preserve it — don't let the tag shape change as a silent side effect.
+- dev-like keeps both tag forms deliberately: stock `changesets/action` with
+  `createGithubReleases: true` owns npm publish and the canonical `<package>@<version>`
+  tag/release; a `always() && !cancelled()` step after it runs an alias reconciler that
+  resolves the canonical remote tag (recursing through annotated tag objects to the commit),
+  creates `v<version>` at that exact commit, and retargets the same GitHub release —
+  ending in one release, two tags.
+- The alias reconciler must fail closed: a conflicting alias SHA, a malformed API response, a
+  non-HTTP-404 lookup failure, or a duplicate release are all hard errors, never silently
+  resolved. Never derive the `v<version>` tag from ambient `HEAD` when the canonical package
+  tag already exists — the canonical tag is the only trusted commit source.
 
 ## Why This Matters
 
@@ -45,6 +64,12 @@ trusted publishing with SLSA provenance. Set up for dev-like; verified end-to-en
 - Wrong ordering costs a redo of the trusted-publisher setup (2FA, manual).
 - Insufficient token permissions produce dead-on-arrival release runs that look like workflow
   bugs.
+- Residual risk with the dual-tag setup: `changesets/action` can publish to npm and then fail
+  before pushing the canonical tag (network blip, API error). The alias reconciler has no safe
+  way to infer intent without that tag — it will not guess. Recovery is manual, not automated,
+  to avoid adding npm metadata/provenance fallback complexity for a rare failure: verify the
+  published version's npm provenance/`gitHead`, create the canonical `<package>@<version>` tag
+  at that verified commit, then rerun the workflow so the alias reconciler completes normally.
 
 ## When to Apply
 
@@ -79,6 +104,14 @@ jobs:
           setupGitUser: false
           version: bun run version-changesets
           publish: bun run publish-changesets
+          createGithubReleases: true
+
+      - name: Reconcile alias release tag
+        if: always() && !cancelled()
+        env:
+          GH_TOKEN: ${{ steps.get-app-token.outputs.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: bun run alias-release
 ```
 
 npm side: package Settings → Trusted Publisher → GitHub Actions → org, repo, workflow
@@ -100,6 +133,10 @@ against the manual publish time.
 - Don't rerun a red publish blindly — check `npm info <pkg> version` and propagation first.
 - Freeze the release workflow filename before enabling trusted publishing.
 - Keep `prepublishOnly: validate + test` so a manual publish can never ship a broken artifact.
+- After adding `"."` to `workspaces`, run `changeset status` to confirm the root package is
+  discovered before relying on it in CI.
+- After a release, verify the canonical `<package>@<version>` tag and the alias `v<version>`
+  tag resolve to the same commit.
 
 ## Related
 
