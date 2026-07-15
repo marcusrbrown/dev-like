@@ -28,4 +28,4 @@ dirs only when the harness doesn't read `.agents/skills/`.
    `/plugin install dev-like` → bare `/dev-like` command.
 
 Per-harness compiled variants (Impeccable-style build step) are deliberately deferred until
-telemetry shows demand — see DESIGN.md §4.
+repeated user requests justify the added complexity.
