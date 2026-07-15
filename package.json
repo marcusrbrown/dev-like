@@ -1,6 +1,6 @@
 {
   "name": "dev-like",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Profile a shop's engineering culture from public sources and install develop-like-<target> agent skills. /dev-like Every",
   "keywords": [
     "agent-skills",
@@ -33,7 +33,10 @@
   "engines": {
     "node": ">=20"
   },
-  "workspaces": ["docs", "."],
+  "workspaces": [
+    "docs",
+    "."
+  ],
   "scripts": {
     "validate": "node scripts/validate.mjs",
     "eval:paired": "node evals/paired/run.mjs",

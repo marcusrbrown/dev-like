@@ -1,5 +1,11 @@
 # dev-like
 
+## 0.3.1
+
+### Patch Changes
+
+- e7fab3a: Make published CLI and harness guidance self-contained.
+
 ## 0.3.0
 
 ### Minor Changes
