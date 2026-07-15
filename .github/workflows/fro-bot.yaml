@@ -1,0 +1,235 @@
+name: Fro Bot
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+  schedule:
+    - cron: '30 14 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Prompt mode
+        type: choice
+        required: true
+        default: autoheal
+        options:
+          - autoheal
+          - pr-review
+      prompt:
+        description: Optional custom prompt
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: >-
+    fro-bot-${{
+      github.event.issue.number ||
+      github.event.pull_request.number ||
+      github.run_id
+    }}
+  cancel-in-progress: false
+
+env:
+  AUTOHEAL_PROMPT: |
+    Hard boundaries (never violate, regardless of task):
+    - Zero runtime dependencies in this repo. Do not add any runtime dep.
+    - Never read or echo .env, gitignored files, or secrets in output, logs, commits, or PR bodies.
+    - Do not add a new registry entry or person profile, and do not edit consent tiers,
+      OPTOUT files, or profile prose. Registry changes require a human. No provenance-claim
+      edits without a source URL.
+    - Do not touch release.yaml, OIDC config, publish steps, or rewrite git history.
+    - Do not re-enable Renovate.
+    - Do not delete dead code flagged by AFT or any tool without independently verified
+      evidence it is unreachable.
+    - Never commit or push directly to main. Never merge a PR yourself.
+    - Never publish changes unless relevant checks pass. If the baseline was already red
+      before your change, document the pre-existing failure explicitly and prove the fix
+      introduces no regressions beyond it.
+    - If you touch registry/, skills/, bin/, or scripts/, add a changeset
+      (bunx changeset) describing the change.
+    - CI, site, link-check, or Fro Bot workflow file fixes are only allowed via a PR backed
+      by evidence from an actual failing run — never speculative edits.
+    - Keep every change minimal, reversible, and scoped to the root cause.
+
+    Perform active repository autoheal. Investigate in this strict order, stopping at the
+    first category with a safe, evidence-backed fix:
+
+    1. CI / site / link-check / Fro Bot workflow failures — inspect the most recent failing
+       runs first. Read logs to find root cause before touching anything.
+    2. Security — dependency or workflow security advisories.
+    3. Schema / generated drift — registry schema mismatches, stale generated artifacts.
+    4. Docs / tests / changesets / artifact hygiene — missing changesets, doc drift, stale
+       generated docs.
+
+    Requirements for any fix:
+    - Root-cause evidence required: cite the failing run, log line, or advisory. No
+      speculative fixes.
+    - Test-first: for behavior fixes, add or update a failing test before the fix, and
+      show it now passes.
+    - Smallest diff that resolves the root cause. No unrelated refactors.
+    - Check for duplicate or previously closed-as-wontfix issues/PRs addressing the same
+      root cause before opening new work.
+    - Before publishing a PR, run the relevant verification gates and include their
+      results as evidence in the PR body: bun run validate, bun run test,
+      bun run --cwd docs test, bun run --cwd docs build, npm pack --dry-run.
+    - At most ONE focused PR or run per invocation. Never commit directly to main, never
+      merge, never touch the release pipeline.
+
+    If no safe fix exists, do not open a PR. Instead update the "Fro Bot Autoheal"
+    rolling issue with findings. If none exists, create it; if the most recent match is
+    closed, reopen it instead of creating a new one. Do not spam new issues.
+
+  PR_REVIEW_PROMPT: |
+    This is dev-like, a repo that is simultaneously an Agent Skill, a Claude Code plugin +
+    marketplace, an npm package, and a data registry. Read AGENTS.md for repo-specific
+    invariants before reviewing.
+
+    Review the current pull request's diff directly. Do NOT invoke ce:review or any other
+    ce:* authoring workflow — this is a focused, single-pass review, not a formal review
+    pipeline run.
+
+    Review-only mode: do NOT edit files, push commits, create branches, or modify the PR in
+    any way beyond leaving review comments. Use inline comments for file-specific findings
+    and the review body for the structured summary below.
+
+    Report only high-confidence findings: correctness bugs and edge cases, security and
+    reliability risks, missing or inadequate behavior-focused tests, and violations of
+    project invariants. Explicitly check for:
+    - New runtime dependencies (this repo must have zero runtime dependencies).
+    - Missing provenance (source URL) for any new claim in profiles or generated skills, or
+      missing/invalid consent tier for person entries.
+    - Missing changesets for changes under registry/, skills/, bin/, or scripts/.
+    - Docs build/link-check breakage (bun run --cwd docs build, link validity).
+    - Unpinned or newly-added GitHub Actions (actions must be pinned to a full commit SHA).
+    - Anything that would compromise release safety (touching release.yaml, OIDC config, or
+      publish steps).
+
+    Skip style nits that are handled mechanically (formatting, lint-fixable issues).
+
+    Leave exactly one consolidated review. Do not duplicate findings already raised in
+    existing review comments. Structure the review body with exactly these headings, using
+    `None` when a section has no items:
+
+    ## Verdict: [PASS | CONDITIONAL | REJECT]
+    CONDITIONAL means the PR can merge after addressing the listed blocking issues.
+
+    ### Blocking issues
+
+    ### Non-blocking concerns
+
+    ### Missing tests
+
+    ### Risk assessment (LOW/MED/HIGH) + rationale
+    Evaluate risk in terms of regression potential, security exposure, automation outage,
+    provenance/consent breakage, and release blast radius.
+
+jobs:
+  fro-bot:
+    name: Fro Bot
+    runs-on: ubuntu-latest
+    if: >-
+      (
+        github.event.pull_request == null ||
+        (
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          !endsWith(github.event.pull_request.user.login || '', '[bot]')
+        )
+      ) && (
+        github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        github.event_name == 'pull_request' ||
+        (
+          github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body || '', '@fro-bot') &&
+          (github.event.comment.user.login || '') != 'fro-bot' &&
+          !endsWith(github.event.comment.user.login || '', '[bot]') &&
+          contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association || '')
+        ) ||
+        (
+          github.event_name == 'pull_request_review_comment' &&
+          contains(github.event.comment.body || '', '@fro-bot') &&
+          (github.event.comment.user.login || '') != 'fro-bot' &&
+          !endsWith(github.event.comment.user.login || '', '[bot]') &&
+          contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association || '')
+        ) ||
+        (
+          github.event_name == 'issues' &&
+          (github.event.issue.user.login || '') != 'fro-bot' &&
+          !endsWith(github.event.issue.user.login || '', '[bot]') &&
+          contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.issue.author_association || '')
+        )
+      )
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: >-
+            ${{
+              github.event_name == 'pull_request_review_comment' && github.event.pull_request.head.ref || github.ref
+            }}
+          fetch-depth: 0
+          persist-credentials: false
+          token: ${{ secrets.FRO_BOT_PAT }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Run Fro Bot
+        uses: fro-bot/agent@0ecd2e43df47a7fb4dc9b638142e83325ba45152 # v0.91.0
+        env:
+          OPENCODE_PROMPT_ARTIFACT: 'true'
+          PROMPT: >-
+            ${{
+              github.event_name == 'workflow_dispatch' && github.event.inputs.prompt != '' && github.event.inputs.prompt ||
+              github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'pr-review' && env.PR_REVIEW_PROMPT ||
+              github.event_name == 'workflow_dispatch' && env.AUTOHEAL_PROMPT ||
+              github.event_name == 'schedule' && env.AUTOHEAL_PROMPT ||
+              github.event_name == 'pull_request' && env.PR_REVIEW_PROMPT ||
+              ''
+            }}
+        with:
+          github-token: ${{ secrets.FRO_BOT_PAT }}
+          auth-json: ${{ secrets.OPENCODE_AUTH_JSON }}
+          opencode-config: ${{ secrets.OPENCODE_CONFIG }}
+          model: ${{ vars.FRO_BOT_MODEL }}
+          prompt: ${{ env.PROMPT }}
+          timeout: '2700000' # 45 minutes
+
+      - name: Report failure to rolling issue
+        if: always() && (failure() || cancelled())
+        env:
+          GH_TOKEN: ${{ secrets.FRO_BOT_PAT }}
+        run: |
+          set -euo pipefail
+          repo="${{ github.repository }}"
+          title="Fro Bot Autoheal"
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          body=$(printf '### Fro Bot run failed\n\n- Run: %s\n- Event: %s\n- SHA: %s\n' \
+            "$run_url" "${{ github.event_name }}" "${{ github.sha }}")
+
+          issue_number=$(gh issue list --repo "$repo" --search "\"$title\" in:title" --state all \
+            --json number,title,state,updatedAt \
+            --jq "[.[] | select(.title == \"$title\")] | sort_by(.updatedAt) | reverse | .[0].number // empty")
+
+          if [ -z "$issue_number" ]; then
+            gh issue create --repo "$repo" --title "$title" --body "$body"
+          else
+            state=$(gh issue view "$issue_number" --repo "$repo" --json state --jq .state)
+            if [ "$state" = "CLOSED" ]; then
+              gh issue reopen "$issue_number" --repo "$repo"
+            fi
+            gh issue comment "$issue_number" --repo "$repo" --body "$body"
+          fi
