@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Read the design doc
-    url: https://github.com/marcusrbrown/dev-like/blob/main/DESIGN.md
+  - name: Read the ethics & consent policy
+    url: https://mrbro.dev/dev-like/ethics/
     about: Rationale for consent tiers, provenance rules, and registry invariants.
