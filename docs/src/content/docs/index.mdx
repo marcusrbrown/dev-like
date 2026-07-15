@@ -3,13 +3,18 @@ title: dev-like
 description: Steal the workflow, not the code.
 template: splash
 hero:
-  tagline: Steal the workflow, not the code. <code>/dev-like <em>target</em></code> and your agent develops like the shops you admire, with receipts.
-  actions:
-    - text: npx skills add marcusrbrown/dev-like
-      link: https://github.com/marcusrbrown/dev-like#install
-      attrs:
-        "data-cta": "primary"
-        "data-umami-event": "install-primary"
+  tagline: |
+    <div class="hero-primary-action">
+      <button type="button" class="primary-copy-button" data-copy-button data-command="npx skills add marcusrbrown/dev-like" data-cta="primary" data-umami-event="install-primary" aria-label="Copy command: npx skills add marcusrbrown/dev-like" title="Copy">
+        <span class="command-text">npx skills add marcusrbrown/dev-like</span>
+        <span class="icon-wrapper">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-copy"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-copied" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-failed" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </span>
+      </button>
+    </div>
+    <div class="hero-tagline-text">Steal the workflow, not the code. <code>/dev-like <em>target</em></code> and your agent develops like the shops you admire, with receipts.</div>
 ---
 
 import BeforeAfter from '../../components/BeforeAfter.astro';
@@ -25,13 +30,15 @@ import CopyCommand from '../../components/CopyCommand.astro';
 
   <section class="grid-layout">
     <div class="install-paths">
-      <h2>Alternate Install Paths</h2>
+      <h2>Install</h2>
       <p>For Claude Code plugins:</p>
       <CopyCommand command="/plugin marketplace add marcusrbrown/dev-like" event="install-plugin-marketplace" />
       <CopyCommand command="/plugin install dev-like" event="install-plugin-direct" />
-      
+
       <p>For cached, headless installations:</p>
       <CopyCommand command="npx dev-like <slug>" event="install-cli-cached" />
+
+      <p><a href="https://github.com/marcusrbrown/dev-like#install" target="_blank" rel="noopener noreferrer">Full install guide</a></p>
     </div>
 
     <div class="first-run">

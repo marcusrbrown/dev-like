@@ -60,29 +60,35 @@ describe('landing route', () => {
     expect(matches.length).toBe(1)
   })
 
-  test('the primary CTA visible command is exactly the skills install command', () => {
-    const primaryCtaMatch = /<[^>]*data-cta="primary"[^>]*>([^<]*)<\/[^>]+>/.exec(landingHtml)
-    expect(primaryCtaMatch, 'expected a primary CTA element with visible text').not.toBeNull()
-    expect(primaryCtaMatch?.[1]?.trim()).toBe('npx skills add marcusrbrown/dev-like')
-  })
-
-  test('the primary CTA points to a real install destination, not a same-page or /dev-like/ link', () => {
-    const primaryCtaTagMatch = /<[^>]*data-cta="primary"[^>]*>/.exec(landingHtml)
-    expect(primaryCtaTagMatch, 'expected a primary CTA element').not.toBeNull()
+  test('the primary CTA is a copy button, not a link to the repo', () => {
+    const primaryCtaTagMatch = /<button[^>]*data-cta="primary"[^>]*>/.exec(landingHtml)
+    expect(primaryCtaTagMatch, 'expected a primary CTA element that is a button').not.toBeNull()
     const tag = primaryCtaTagMatch?.[0] ?? ''
-    const hrefMatch = /href="([^"]*)"/.exec(tag)
-    expect(hrefMatch, 'expected the primary CTA element to carry an href').not.toBeNull()
-    const href = hrefMatch?.[1] ?? ''
-    expect(href).toBe('https://github.com/marcusrbrown/dev-like#install')
-    expect(href).not.toBe('/dev-like/')
-    expect(href.startsWith('#')).toBe(false)
+    expect(tag).toContain('data-copy-button')
+    expect(tag).toContain('data-command="npx skills add marcusrbrown/dev-like"')
   })
 
-  test('secondary CLI and plugin install paths are present but not marked primary', () => {
+  test('the "Install" section contains alternate install paths and a link to the full install guide', () => {
     expect(landingHtml).toContain('npx dev-like')
     const secondaryCliMatch = /<[^>]*>[^<]*npx dev-like[^<]*<\/[^>]+>/.exec(landingHtml)
     expect(secondaryCliMatch, 'expected a rendered element containing the CLI install path').not.toBeNull()
     expect(secondaryCliMatch?.[0]).not.toContain('data-cta="primary"')
+
+    expect(landingHtml).toContain('<h2>Install</h2>')
+    expect(landingHtml).not.toContain('<h2>Alternate Install Paths</h2>')
+
+    // Check for the Full install guide link
+    const guideLinkMatch = /<a[^>]*href="https:\/\/github\.com\/marcusrbrown\/dev-like#install"[^>]*>Full install guide<\/a>/.exec(landingHtml)
+    expect(guideLinkMatch, 'expected a Full install guide link pointing to the repo').not.toBeNull()
+  })
+
+  test('the header contains a visible text Registry link', () => {
+    // Look for the registry link within the header section
+    const headerMatch = /<header[^>]*>[\s\S]*?<\/header>/.exec(landingHtml)
+    expect(headerMatch, 'expected a header element').not.toBeNull()
+    const headerHtml = headerMatch?.[0] ?? ''
+    const registryLinkMatch = /<a[^>]*href="\/dev-like\/registry\/"[^>]*>Registry<\/a>/.exec(headerHtml)
+    expect(registryLinkMatch, 'expected a Registry link in the header').not.toBeNull()
   })
 
   test('secondary install commands have accessible copy controls and correct tracking events', () => {
@@ -90,6 +96,18 @@ describe('landing route', () => {
     expect(landingHtml).toContain('data-umami-event="install-plugin-direct"')
     expect(landingHtml).toContain('data-umami-event="install-cli-cached"')
     expect(landingHtml).toMatch(/<button[^>]*data-copy-button[^>]*>/)
+
+    // Copy affordance should use icons instead of tex
+    expect(landingHtml).not.toContain('<span class="copy-text">Copy</span>')
+  })
+
+  test('copy buttons have their inherited top margin explicitly reset to 0 for vertical centering', () => {
+    const customCssPath = path.join(DOCS_ROOT, 'src', 'styles', 'custom.css')
+    const customCss = readFileSync(customCssPath, 'utf8')
+    const copyButtonMatch = /\.copy-button\s*\{([^}]+)\}/.exec(customCss)
+    expect(copyButtonMatch, 'expected .copy-button styles').not.toBeNull()
+    const styles = copyButtonMatch?.[1] ?? ''
+    expect(styles).toMatch(/margin:\s*0\s*(?:!important)?\s*;/)
   })
 
   test('first-run /dev-like guidance is present but not marked primary', () => {

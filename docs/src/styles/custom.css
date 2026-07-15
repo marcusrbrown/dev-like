@@ -76,6 +76,24 @@ code, kbd, pre, samp {
 
 .hero .tagline {
   order: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-primary-action {
+  order: 1;
+}
+
+.hero-tagline-text {
+  order: 2;
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 50rem) {
+  .hero .tagline {
+    align-items: flex-start;
+  }
 }
 
 .landing-content {
@@ -133,9 +151,11 @@ code, kbd, pre, samp {
   background: transparent;
   border: 1px solid var(--sl-color-gray-2);
   color: var(--sl-color-gray-2);
-  padding: 0.25rem 0.5rem;
-  font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 0.75rem;
+  padding: 0.4rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
 }
@@ -153,18 +173,31 @@ code, kbd, pre, samp {
   }
 }
 
-a[data-cta="primary"] {
+button[data-cta="primary"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   background-color: transparent !important;
   color: var(--sl-color-text) !important;
   border: 2px solid var(--sl-color-text) !important;
   font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: clamp(var(--sl-text-sm), calc(0.25rem + 1vw), var(--sl-text-base));
+  line-height: 1.4;
   transition: border-color 0.2s, color 0.2s;
   border-radius: 0 !important;
   padding: 0.75rem 1.5rem !important;
+  cursor: pointer;
+  margin: 1.5rem 0;
 }
 
-a[data-cta="primary"]:hover,
-a[data-cta="primary"]:focus-visible {
+button[data-cta="primary"] .icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button[data-cta="primary"]:hover,
+button[data-cta="primary"]:focus-visible {
   border-color: var(--accent-highlighter) !important;
   color: var(--accent-highlighter) !important;
   text-decoration: none;
@@ -217,7 +250,7 @@ a[data-cta="primary"]:focus-visible {
     animation: none;
     clip-path: none;
   }
-  .receipt-highlight, .provenance-link, a[data-cta="primary"], .transcript-link a, .copy-button {
+  .receipt-highlight, .provenance-link, button[data-cta="primary"], .transcript-link a, .copy-button {
     transition: none !important;
   }
 }

@@ -36,6 +36,9 @@ export default defineConfig({
     starlight({
       title: 'dev-like',
       favicon: '/favicon.svg',
+      components: {
+        Header: './src/components/Header.astro',
+      },
       customCss: ['./src/styles/custom.css'],
       description:
         "Profile a shop's engineering culture from public sources and install develop-like-<target> agent skills, with receipts.",
