@@ -90,12 +90,21 @@ env:
     closed, reopen it instead of creating a new one. Do not spam new issues.
 
   PR_REVIEW_PROMPT: |
-    Review-only mode for the current pull request. Do NOT edit files, push commits, create
-    branches, or modify the PR in any way beyond leaving review comments.
+    This is dev-like, a repo that is simultaneously an Agent Skill, a Claude Code plugin +
+    marketplace, an npm package, and a data registry. Read AGENTS.md for repo-specific
+    invariants before reviewing.
 
-    Inspect the PR diff and any existing review feedback on it. Report only high-confidence
-    findings: correctness bugs, security issues, reliability risks, missing or inadequate
-    tests, and violations of project invariants. Explicitly check for:
+    Review the current pull request's diff directly. Do NOT invoke ce:review or any other
+    ce:* authoring workflow — this is a focused, single-pass review, not a formal review
+    pipeline run.
+
+    Review-only mode: do NOT edit files, push commits, create branches, or modify the PR in
+    any way beyond leaving review comments. Use inline comments for file-specific findings
+    and the review body for the structured summary below.
+
+    Report only high-confidence findings: correctness bugs and edge cases, security and
+    reliability risks, missing or inadequate behavior-focused tests, and violations of
+    project invariants. Explicitly check for:
     - New runtime dependencies (this repo must have zero runtime dependencies).
     - Missing provenance (source URL) for any new claim in profiles or generated skills, or
       missing/invalid consent tier for person entries.
@@ -105,9 +114,24 @@ env:
     - Anything that would compromise release safety (touching release.yaml, OIDC config, or
       publish steps).
 
-    Leave exactly one consolidated review or comment summarizing findings. Do not duplicate
-    findings already raised in existing review comments. If there are no high-confidence
-    issues, say so briefly rather than manufacturing nitpicks.
+    Skip style nits that are handled mechanically (formatting, lint-fixable issues).
+
+    Leave exactly one consolidated review. Do not duplicate findings already raised in
+    existing review comments. Structure the review body with exactly these headings, using
+    `None` when a section has no items:
+
+    ## Verdict: [PASS | CONDITIONAL | REJECT]
+    CONDITIONAL means the PR can merge after addressing the listed blocking issues.
+
+    ### Blocking issues
+
+    ### Non-blocking concerns
+
+    ### Missing tests
+
+    ### Risk assessment (LOW/MED/HIGH) + rationale
+    Evaluate risk in terms of regression potential, security exposure, automation outage,
+    provenance/consent breakage, and release blast radius.
 
 jobs:
   fro-bot:
