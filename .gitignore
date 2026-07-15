@@ -8,3 +8,4 @@ HANDOFF.md
 LAUNCH.md
 docs/.astro/
 docs/src/content/docs/_generated/
+.env
