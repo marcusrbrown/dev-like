@@ -80,8 +80,7 @@ Plain node works too (`node scripts/validate.mjs`, `node --test tests/`) — the
 zero runtime dependencies. Provenance links are re-checked weekly in CI; trigger evals and the
 paired workflow eval live in [evals/](evals/).
 
-See [DESIGN.md](DESIGN.md) for architecture and [CONTRIBUTING.md](CONTRIBUTING.md) for
-adding registry profiles.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for adding registry profiles.
 
 ## License
 
