@@ -1,19 +1,52 @@
 name: Site
 
-# Routing probe stub — will be REPLACED by the real Starlight build later.
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - docs/site-stub/**
+      - docs/**
+      - registry/**
       - .github/workflows/site.yaml
 
 permissions:
   contents: read
 
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Validate registry and skill
+        run: bun run validate
+
+      - name: Run docs tests
+        run: bun run --cwd docs test
+
+      - name: Build docs site
+        run: bun run --cwd docs build
+        env:
+          UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        with:
+          path: docs/dist
+
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -22,9 +55,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: docs/site-stub
       - id: deployment
-        uses: actions/deploy-pages@v4
+        name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

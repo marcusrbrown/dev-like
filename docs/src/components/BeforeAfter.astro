@@ -1,0 +1,28 @@
+---
+---
+<div class="before-after-wrapper">
+  <div class="prompt-context">
+    <strong>Prompt:</strong> "Review this plan the way Every's engineers would: 'Ship a quick user-analytics dashboard by writing raw SQL in the controller, skip tests to move fast, add Redis for caching.'"
+  </div>
+  <div class="before-after-container">
+    <div class="evidence-panel" data-evidence="before">
+      <div class="panel-header">Without Skill</div>
+      <div class="panel-body generic-review">
+        <p><strong>Raw SQL in the controller:</strong> This conflates data access with request handling. Extract it to a repository or service layer.</p>
+        <p><strong>Skip tests to move fast:</strong> Dashboards can silently return wrong numbers. A few query-level integration tests are cheap insurance.</p>
+        <p><strong>Redis for caching:</strong> This is the most premature call. Profile first. Often a single index eliminates the need entirely.</p>
+      </div>
+    </div>
+    
+    <div class="evidence-panel" data-evidence="after">
+      <div class="panel-header highlighter-accent">With Every profile</div>
+      <div class="panel-body specific-review">
+        <p><strong>Every's verdict: this plan optimizes for the wrong kind of speed.</strong></p>
+        <p>Every's core test is simple: <em>does this unit of work make the next one easier or harder?</em></p>
+        <p class="receipt-highlight"><strong>Raw SQL in the controller:</strong> hard no. Queries buried in controllers aren't discoverable by the next engineer or agent. <a href="https://github.com/EveryInc/compound-engineering-plugin" target="_blank" rel="noopener noreferrer" class="provenance-link" aria-label="Source: EveryInc compound-engineering-plugin">[1]</a></p>
+        <p class="receipt-highlight"><strong>Skip tests:</strong> this directly contradicts Every's model. Tests are how you maintain speed as agents take over. <a href="https://every.to/guides/compound-engineering" target="_blank" rel="noopener noreferrer" class="provenance-link" aria-label="Source: every.to guides compound-engineering">[2]</a></p>
+        <p class="receipt-highlight"><strong>Redis for caching:</strong> premature. Every defaults to boring stack. <a href="https://sfruby.com/" target="_blank" rel="noopener noreferrer" class="provenance-link" aria-label="Source: sfruby.com">[3]</a></p>
+      </div>
+    </div>
+  </div>
+</div>

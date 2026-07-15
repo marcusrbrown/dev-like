@@ -33,6 +33,7 @@
   "engines": {
     "node": ">=20"
   },
+  "workspaces": ["docs"],
   "scripts": {
     "validate": "node scripts/validate.mjs",
     "eval:paired": "node evals/paired/run.mjs",

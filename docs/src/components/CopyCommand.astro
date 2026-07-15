@@ -1,0 +1,68 @@
+---
+export interface Props {
+  command: string;
+  event: string;
+}
+
+const { command, event } = Astro.props;
+---
+
+<div class="command-block-wrapper">
+  <div class="command-block">{command}</div>
+  <button
+    type="button"
+    class="copy-button"
+    data-copy-button
+    data-command={command}
+    data-umami-event={event}
+    aria-label={`Copy command: ${command}`}
+  >
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+
+<script>
+  function initCopyButtons() {
+    document.querySelectorAll('[data-copy-button]:not([data-copy-bound])').forEach((button) => {
+      button.setAttribute('data-copy-bound', 'true');
+      button.addEventListener('click', async () => {
+        const command = button.getAttribute('data-command');
+        if (command) {
+          let success = false;
+          try {
+            if (navigator.clipboard && window.isSecureContext) {
+              await navigator.clipboard.writeText(command);
+              success = true;
+            } else {
+              throw new Error('Clipboard API not available');
+            }
+          } catch (err) {
+            try {
+              const ta = document.createElement('textarea');
+              ta.value = command;
+              ta.style.position = 'fixed';
+              ta.style.left = '-9999px';
+              document.body.appendChild(ta);
+              ta.select();
+              success = document.execCommand('copy');
+              document.body.removeChild(ta);
+            } catch (fallbackErr) {
+              success = false;
+            }
+          }
+
+          const span = button.querySelector('.copy-text');
+          if (span) {
+            span.textContent = success ? 'Copied' : 'Copy failed';
+            setTimeout(() => {
+              span.textContent = 'Copy';
+            }, 2000);
+          }
+        }
+      });
+    });
+  }
+
+  initCopyButtons();
+  document.addEventListener('astro:page-load', initCopyButtons);
+</script>
