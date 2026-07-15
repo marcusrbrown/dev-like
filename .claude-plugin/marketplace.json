@@ -1,6 +1,7 @@
 {
   "name": "dev-like",
   "owner": { "name": "Marcus R. Brown", "url": "https://github.com/marcusrbrown" },
+  "description": "Profile a shop's engineering culture from public sources and generate develop-like-<target> skills.",
   "plugins": [
     {
       "name": "dev-like",
