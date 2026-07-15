@@ -1,8 +1,9 @@
 :root {
   --sl-hue: 210;
-  
+
   --sl-color-bg: oklch(0.98 0.005 var(--sl-hue));
-  --sl-color-bg-nav: oklch(0.96 0.005 var(--sl-hue));
+  --sl-color-bg-nav: var(--sl-color-bg);
+  --sl-color-bg-sidebar: var(--sl-color-bg);
   --sl-color-bg-inline-code: oklch(0.95 0.005 var(--sl-hue));
   --sl-color-text: oklch(0.25 0.01 var(--sl-hue));
   --sl-color-white: oklch(0.15 0.01 var(--sl-hue));
@@ -10,18 +11,23 @@
   --sl-color-gray-2: oklch(0.55 0.01 var(--sl-hue));
   --sl-color-gray-5: oklch(0.85 0.01 var(--sl-hue));
   --sl-color-black: oklch(0.99 0.002 var(--sl-hue));
-  
+
   --accent-highlighter: oklch(0.6 0.2 250);
   --sl-color-accent-high: var(--accent-highlighter);
   --sl-color-accent: var(--accent-highlighter);
-  
+
   --blueprint-grid: oklch(0.90 0.01 var(--sl-hue));
+  --sl-color-hairline: var(--blueprint-grid);
+  --sl-color-hairline-light: var(--blueprint-grid);
+  --sl-color-hairline-shade: var(--blueprint-grid);
+
   --evidence-gap: 4rem;
 }
 
 :root[data-theme='dark'] {
   --sl-color-bg: oklch(0.18 0.015 var(--sl-hue));
-  --sl-color-bg-nav: oklch(0.15 0.015 var(--sl-hue));
+  --sl-color-bg-nav: var(--sl-color-bg);
+  --sl-color-bg-sidebar: var(--sl-color-bg);
   --sl-color-bg-inline-code: oklch(0.22 0.015 var(--sl-hue));
   --sl-color-text: oklch(0.92 0.01 var(--sl-hue));
   --sl-color-white: oklch(0.98 0.005 var(--sl-hue));
@@ -29,9 +35,12 @@
   --sl-color-gray-2: oklch(0.65 0.01 var(--sl-hue));
   --sl-color-gray-5: oklch(0.35 0.01 var(--sl-hue));
   --sl-color-black: oklch(0.12 0.015 var(--sl-hue));
-  
+
   --accent-highlighter: oklch(0.75 0.18 190);
   --blueprint-grid: oklch(0.25 0.015 var(--sl-hue));
+  --sl-color-hairline: var(--blueprint-grid);
+  --sl-color-hairline-light: var(--blueprint-grid);
+  --sl-color-hairline-shade: var(--blueprint-grid);
 }
 
 body {
@@ -190,7 +199,7 @@ a[data-cta="primary"]:focus-visible {
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   border: 1px solid var(--blueprint-grid);
-  background-image: 
+  background-image:
     linear-gradient(var(--blueprint-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--blueprint-grid) 1px, transparent 1px);
   background-size: 2rem 2rem;
