@@ -176,7 +176,7 @@ describe('ethics route', () => {
     expect(ethicsHtml).toMatch(/48[\s-]hour/)
   })
 
-  test('describes self-published accurately: the subject ships its own culture artifacts (DESIGN.md:84)', () => {
+  test('describes self-published accurately: the subject ships its own culture artifacts', () => {
     expect(ethicsHtml.toLowerCase()).toMatch(/subject ships (its|their) own culture artifacts/)
     expect(ethicsHtml.toLowerCase()).not.toMatch(/self-published[\s\S]{0,80}publish(es)? a dev-like profile/)
   })

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // dev-like CLI — thin, deterministic plumbing. The agent skill does the smart work.
 //
-// v0.2: resolve + install from the registry. No telemetry, no postinstall, no network
-// beyond raw.githubusercontent.com. See DESIGN.md §3.4.
+// Resolve + install from the registry. No telemetry, no postinstall, no network
+// beyond raw.githubusercontent.com.
 
 import { parseArgs } from 'node:util';
 import { readFile, mkdir, writeFile, readdir, lstat, stat, symlink, realpath, rm, cp } from 'node:fs/promises';
