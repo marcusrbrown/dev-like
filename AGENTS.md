@@ -1,7 +1,5 @@
 # dev-like — agent context
 
-Read DESIGN.md before structural changes; it holds the decisions and their rationale.
-
 - This repo is simultaneously: an Agent Skill (`skills/dev-like/`), a Claude Code plugin +
   marketplace (`.claude-plugin/`), an npm package (`dev-like`, CLI in `bin/`), and a data
   registry (`registry/`).
