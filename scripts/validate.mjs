@@ -6,8 +6,14 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { renderSkill } from './generate-skill.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+async function fssExists(path) {
+  return stat(path).then(() => true).catch(() => false);
+}
+
 const TIERS = ['self-published', 'stated', 'observed', 'social'];
 const PERSON_TIERS = ['self-published', 'stated'];
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -55,8 +61,7 @@ async function validateSkills() {
   }
 }
 
-async function validateRegistry() {
-  const regDir = join(ROOT, 'registry');
+async function validateRegistry(regDir = join(ROOT, 'registry')) {
   const index = JSON.parse(await readFile(join(regDir, 'index.json'), 'utf8'));
   const dirs = [];
   for (const name of await readdir(regDir)) {
@@ -94,6 +99,30 @@ async function validateRegistry() {
       if (ie.consentTier !== entry.consentTier) fail(`${slug}: index/entry consentTier drift`);
       if (ie.updated !== entry.updated) fail(`${slug}: index/entry updated drift`);
     }
+
+    // Every entry must generate cleanly in-memory — catches profile.md missing a
+    // required section before it ever bites an end user via `npx dev-like <slug>`.
+    let generated = null;
+    try {
+      generated = await renderSkill(slug, regDir);
+    } catch (err) {
+      fail(err.message);
+    }
+
+    // If a prebuilt skill/ tree is committed, it must match fresh regeneration exactly,
+    // so a stale committed tree can't silently drift from profile.md/entry.json.
+    if (generated) {
+      const dirName = `develop-like-${slug}`;
+      const skillDir = join(regDir, slug, 'skill', dirName);
+      if (await fssExists(skillDir)) {
+        for (const [rel, content] of Object.entries(generated)) {
+          const committed = await readFile(join(skillDir, rel), 'utf8').catch(() => null);
+          if (committed === null) fail(`${slug}: prebuilt skill/ missing ${rel} (regenerate with generate-skill.mjs)`);
+          else if (committed !== content) fail(`${slug}: prebuilt skill/${rel} drifted from profile.md/entry.json (regenerate with generate-skill.mjs)`);
+        }
+      }
+    }
+
     ok(`registry ${slug}`);
   }
 
@@ -102,9 +131,10 @@ async function validateRegistry() {
   }
 }
 
-export async function validate() {
+export async function validate({ regDir } = {}) {
+  failures = 0;
   await validateSkills();
-  await validateRegistry();
+  await validateRegistry(regDir);
   if (failures) console.error(`\n${failures} failure(s)`);
   else console.log('\nAll checks passed.');
   return failures === 0;
