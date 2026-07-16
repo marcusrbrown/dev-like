@@ -106,6 +106,7 @@ export default defineConfig({
           items: [{ autogenerate: { directory: '_generated' } }],
         },
         { label: 'Ethics & Consent', slug: 'ethics' },
+        { label: 'Harness Support', slug: 'harness-support' },
       ],
       routeMiddleware: './src/routeMiddleware.ts',
     }),

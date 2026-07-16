@@ -1,0 +1,22 @@
+{
+  "slug": "37signals",
+  "name": "37signals",
+  "kind": "org",
+  "aliases": ["basecamp", "37signals llc", "thirtysevensignals"],
+  "consentTier": "self-published",
+  "updated": "2026-07-16",
+  "homepage": "https://37signals.com",
+  "summary": "shape up cycles/betting/circuit-breaker, vanilla server-first Rails, manual exploratory QA over dogma",
+  "sources": [
+    { "url": "https://basecamp.com/shapeup", "fetched": "2026-07-16", "tier": "self-published", "note": "Shape Up book: appetite, shaping, betting table, hill charts, circuit breaker, glossary" },
+    { "url": "https://basecamp.com/shapeup/0.3-chapter-01", "fetched": "2026-07-16", "tier": "self-published", "note": "six-week cycles, shaping the work, hand over responsibility, targeting risk" },
+    { "url": "https://basecamp.com/shapeup/2.2-chapter-08", "fetched": "2026-07-16", "tier": "self-published", "note": "the betting table: six-week cycles, cool-down, circuit breaker" },
+    { "url": "https://basecamp.com/shapeup/3.1-chapter-10", "fetched": "2026-07-16", "tier": "self-published", "note": "assign projects not tasks; done means deployed" },
+    { "url": "https://github.com/basecamp/handbook/blob/master/how-we-work.md", "fetched": "2026-07-16", "tier": "self-published", "note": "remote-first, 6-week cycles, cooldown, async communication, managers of one" },
+    { "url": "https://dev.37signals.com/a-vanilla-rails-stack-is-plenty/", "fetched": "2026-07-16", "tier": "self-published", "note": "vanilla Rails, Hotwire, import maps, Propshaft, solid_cache/queue/cable, Minitest, Kamal" },
+    { "url": "https://dev.37signals.com/all-about-qa/", "fetched": "2026-07-16", "tier": "self-published", "note": "manual, guided exploratory QA within Shape Up cycles; accessibility and visual-regression tooling" },
+    { "url": "https://dev.37signals.com/kamal-2/", "fetched": "2026-07-16", "tier": "self-published", "note": "Kamal 2.0: imperative deploys via kamal-proxy, no k8s" },
+    { "url": "https://world.hey.com/dhh/coding-should-be-a-vibe-50908f49", "fetched": "2026-07-16", "tier": "stated", "note": "DHH: coding as craft/joy, skeptical of full vibe-coding handoff" },
+    { "url": "https://world.hey.com/dhh/basecamp-becomes-agent-accessible-3ae6b949", "fetched": "2026-07-16", "tier": "stated", "note": "DHH: Basecamp ships agent-accessible API, CLI, and skill for AI agents" }
+  ]
+}
