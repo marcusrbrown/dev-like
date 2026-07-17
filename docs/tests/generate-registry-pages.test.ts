@@ -51,12 +51,37 @@ async function hasPrebuiltSkillFixture(slug: string): Promise<boolean> {
   }
 }
 
-async function findSlugMissingSections(slugs: string[], headings: string[]): Promise<string | undefined> {
-  for (const slug of slugs) {
-    const profile = await fs.readFile(path.join(REGISTRY_DIR, slug, 'profile.md'), 'utf8')
-    if (headings.every((h) => !profile.includes(`## ${h}`))) return slug
+// Synthetic fixtures: registry/ is expected to conform to the strict section template
+// (enforced by scripts/validate.mjs) and to have a prebuilt skill/ tree for every entry, so
+// the real registry no longer reliably contains a deviant entry to exercise these lenient
+// code paths. Build minimal single-entry temp registries instead.
+async function writeSyntheticEntry(
+  regDir: string,
+  slug: string,
+  opts: { profile: string; withPrebuiltSkill: boolean },
+): Promise<void> {
+  const slugDir = path.join(regDir, slug)
+  await fs.mkdir(slugDir, { recursive: true })
+
+  const entry = {
+    slug,
+    name: `Synthetic ${slug}`,
+    kind: 'org',
+    consentTier: 'self-published',
+    updated: '2026-07-11',
+    sources: [{ url: 'https://example.com/source', fetched: '2026-07-11', tier: 'self-published' }],
   }
-  return undefined
+  await fs.writeFile(path.join(slugDir, 'entry.json'), JSON.stringify(entry, null, 2), 'utf8')
+  await fs.writeFile(path.join(slugDir, 'profile.md'), opts.profile, 'utf8')
+
+  const index = { entries: { [slug]: { name: entry.name, kind: entry.kind, consentTier: entry.consentTier, updated: entry.updated } } }
+  await fs.writeFile(path.join(regDir, 'index.json'), JSON.stringify(index, null, 2), 'utf8')
+
+  if (opts.withPrebuiltSkill) {
+    const skillDir = path.join(slugDir, 'skill', `develop-like-${slug}`)
+    await fs.mkdir(skillDir, { recursive: true })
+    await fs.writeFile(path.join(skillDir, 'SKILL.md'), '---\nname: stub\n---\nstub\n', 'utf8')
+  }
 }
 
 async function findSlugWithHeading(slugs: string[], heading: string | string[]): Promise<string | undefined> {
@@ -84,19 +109,36 @@ test('parseSections keys by heading name regardless of order', () => {
   assert.equal(sections['Core principle'], 'C body')
 })
 
-test('parseSections tolerates missing optional sections (real registry entry deviation)', async () => {
-  const index = await readRegistryIndex()
-  const slugs = Object.keys(index.entries)
-  const slug = await findSlugMissingSections(slugs, ['Core principle', 'Workflow shape'])
-  assert.ok(slug, 'expected at least one registry entry missing Core principle / Workflow shape')
-  const profile = await fs.readFile(path.join(REGISTRY_DIR, slug!, 'profile.md'), 'utf8')
-  const sections = parseSections(profile)
+const SYNTHETIC_PROFILE_MISSING_CORE_AND_WORKFLOW = [
+  '# Synthetic deviant — dev culture profile',
+  '',
+  '## Identity',
+  '',
+  'A synthetic fixture entry, missing Core principle and Workflow shape.',
+  '[[source]](https://example.com/source)',
+  '',
+  '## Stack',
+  '',
+  'n/a',
+  '',
+  '## Principles (cited)',
+  '',
+  '1. n/a',
+  '',
+  '## Tensions',
+  '',
+  'n/a',
+  '',
+].join('\n')
+
+test('parseSections tolerates missing optional sections (synthetic deviant fixture)', () => {
+  const sections = parseSections(SYNTHETIC_PROFILE_MISSING_CORE_AND_WORKFLOW)
   assert.equal(sections['Core principle'], undefined)
   assert.equal(sections['Workflow shape'], undefined)
   assert.ok(sections['Identity'])
   assert.ok(sections['Principles (cited)'])
   assert.ok(sections['Stack'])
-    const tensionsKey = Object.keys(sections).find((k) => k.startsWith('Tensions'))
+  const tensionsKey = Object.keys(sections).find((k) => k.startsWith('Tensions'))
   assert.ok(tensionsKey, 'expected a heading starting with "Tensions"')
 })
 
@@ -263,23 +305,25 @@ test('generate() shows npx dev-like <slug> and SKILL.md link for prebuilt entrie
 })
 
 test('generate() shows /dev-like <slug> generation instruction for entries with no prebuilt skill', async () => {
-  const outDir = await mktmp()
+  // Synthetic fixture: every real registry entry now has a committed prebuilt skill/ tree
+  // (enforced by scripts/validate.mjs's drift check), so there's no live entry left to
+  // exercise the non-prebuilt / AE6 empty-state code path.
+  const registryDir = await mktmp('dev-like-docsgen-noprebuilt-')
+  const outDir = await mktmp('dev-like-docsgen-noprebuilt-out-')
   try {
-    const index = await readRegistryIndex()
-    const nonPrebuiltSlugs: string[] = []
-    for (const slug of Object.keys(index.entries)) {
-      if (!(await hasPrebuiltSkillFixture(slug))) nonPrebuiltSlugs.push(slug)
-    }
-    assert.ok(nonPrebuiltSlugs.length > 0, 'expected at least one non-prebuilt-skill fixture entry')
+    const slug = 'synthetic-noprebuilt'
+    await writeSyntheticEntry(registryDir, slug, {
+      profile: SYNTHETIC_PROFILE_MISSING_CORE_AND_WORKFLOW,
+      withPrebuiltSkill: false,
+    })
 
-    const result = await generate({ registryDir: REGISTRY_DIR, outDir })
-    assert.equal(result.ok, true)
-    for (const slug of nonPrebuiltSlugs) {
-      const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
-      assert.ok(mdx.includes(`/dev-like ${slug}`))
-      assert.ok(!mdx.includes(`npx dev-like ${slug}`))
-    }
+    const result = await generate({ registryDir, outDir, validateFn: async () => true })
+    assert.equal(result.ok, true, `generate failed: ${JSON.stringify(result.errors)}`)
+    const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
+    assert.ok(mdx.includes(`/dev-like ${slug}`))
+    assert.ok(!mdx.includes(`npx dev-like ${slug}`))
   } finally {
+    await fs.rm(registryDir, { recursive: true, force: true })
     await fs.rm(outDir, { recursive: true, force: true })
   }
 })
@@ -310,21 +354,24 @@ test('generate() normalizes citations in generated Markdown but leaves source pr
 })
 
 test('generate() renders entries with missing optional sections without error', async () => {
-  const outDir = await mktmp()
+  const registryDir = await mktmp('dev-like-docsgen-missingsections-')
+  const outDir = await mktmp('dev-like-docsgen-missingsections-out-')
   try {
-    const index = await readRegistryIndex()
-    const slugs = Object.keys(index.entries)
-    const slug = await findSlugMissingSections(slugs, ['Core principle', 'Workflow shape'])
-    assert.ok(slug, 'expected at least one registry entry missing Core principle / Workflow shape')
+    const slug = 'synthetic-missing-sections'
+    await writeSyntheticEntry(registryDir, slug, {
+      profile: SYNTHETIC_PROFILE_MISSING_CORE_AND_WORKFLOW,
+      withPrebuiltSkill: false,
+    })
 
-    const result = await generate({ registryDir: REGISTRY_DIR, outDir })
-    assert.equal(result.ok, true)
+    const result = await generate({ registryDir, outDir, validateFn: async () => true })
+    assert.equal(result.ok, true, `generate failed: ${JSON.stringify(result.errors)}`)
     const mdx = await fs.readFile(path.join(outDir, `${slug}.md`), 'utf8')
     assert.ok(mdx.includes('Identity'))
     assert.ok(mdx.includes('Principles (cited)'))
     assert.ok(mdx.includes('Stack'))
     assert.ok(mdx.includes('Tensions'))
   } finally {
+    await fs.rm(registryDir, { recursive: true, force: true })
     await fs.rm(outDir, { recursive: true, force: true })
   }
 })
