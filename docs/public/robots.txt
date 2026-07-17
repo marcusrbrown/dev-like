@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mrbro.dev/dev-like/sitemap-index.xml

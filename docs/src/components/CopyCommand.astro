@@ -24,65 +24,11 @@ const { command, event } = Astro.props;
   </button>
 </div>
 
-<script>
-  function initCopyButtons() {
-    document.querySelectorAll('[data-copy-button]:not([data-copy-bound])').forEach((button) => {
-      button.setAttribute('data-copy-bound', 'true');
-      button.addEventListener('click', async () => {
-        const command = button.getAttribute('data-command');
-        if (command) {
-          let success = false;
-          try {
-            if (navigator.clipboard && window.isSecureContext) {
-              await navigator.clipboard.writeText(command);
-              success = true;
-            } else {
-              throw new Error('Clipboard API not available');
-            }
-          } catch (err) {
-            try {
-              const ta = document.createElement('textarea');
-              ta.value = command;
-              ta.style.position = 'fixed';
-              ta.style.left = '-9999px';
-              document.body.appendChild(ta);
-              ta.select();
-              success = document.execCommand('copy');
-              document.body.removeChild(ta);
-            } catch (fallbackErr) {
-              success = false;
-            }
-          }
-
-          const iconCopy = button.querySelector('.icon-copy') as HTMLElement | null;
-          const iconCopied = button.querySelector('.icon-copied') as HTMLElement | null;
-          const iconFailed = button.querySelector('.icon-failed') as HTMLElement | null;
-
-          if (iconCopy && iconCopied && iconFailed) {
-            iconCopy.style.display = 'none';
-            if (success) {
-              iconCopied.style.display = 'block';
-              button.setAttribute('aria-label', 'Copied');
-              button.setAttribute('title', 'Copied');
-            } else {
-              iconFailed.style.display = 'block';
-              button.setAttribute('aria-label', 'Copy failed');
-              button.setAttribute('title', 'Copy failed');
-            }
-
-            setTimeout(() => {
-              iconCopied.style.display = 'none';
-              iconFailed.style.display = 'none';
-              iconCopy.style.display = 'block';
-              button.setAttribute('aria-label', `Copy command: ${command}`);
-              button.setAttribute('title', 'Copy');
-            }, 2000);
-          }
-        }
-      });
-    });
-  }
-
-  initCopyButtons();
-  document.addEventListener('astro:page-load', initCopyButtons);
-</script>
+{/*
+  Copy-to-clipboard behavior is bound globally via the site-wide Head override
+  (src/components/Head.astro), which delegates a single document-level click
+  handler to any [data-copy-button] element on the page. This lets pages that
+  render raw button HTML without this component (e.g. generated registry
+  pages, the landing page's hero CTA) get working copy behavior too, without
+  needing this component's script to be bundled on their page.
+*/}

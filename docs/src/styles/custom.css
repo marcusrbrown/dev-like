@@ -166,6 +166,39 @@ code, kbd, pre, samp {
   border-color: var(--accent-highlighter);
 }
 
+/* Registry pages render copy buttons as raw generated HTML outside a
+   .command-block-wrapper, so they can't rely on .copy-button's absolute
+   positioning (which assumes that wrapper's `position: relative` context).
+   This variant is self-contained and statically positioned inline with its
+   command text. */
+.registry-copy-button {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transform: none;
+  background: transparent;
+  border: 1px solid var(--sl-color-gray-2);
+  color: var(--sl-color-gray-2);
+  padding: 0.4rem 0.75rem;
+  margin: 0;
+  cursor: pointer;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.85rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.registry-copy-button:hover,
+.registry-copy-button:focus-visible {
+  color: var(--accent-highlighter);
+  border-color: var(--accent-highlighter);
+}
+
+.registry-copy-button .command-text {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .grid-layout {
     grid-template-columns: 1fr;

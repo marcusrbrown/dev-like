@@ -1,0 +1,82 @@
+---
+// Global Head override: renders Starlight's default <head> content, then adds a
+// site-wide, delegated copy-to-clipboard handler. Bundled by Astro once and shipped
+// on every page (unlike CopyCommand.astro's own <script>, which only ships on pages
+// that render that component) so raw `[data-copy-button]` markup — e.g. the
+// generated registry pages — gets working copy behavior too.
+import Default from '@astrojs/starlight/components/Head.astro';
+---
+
+<Default />
+
+<script>
+  declare global {
+    interface Window {
+      __devLikeCopyButtonBound?: boolean;
+    }
+  }
+
+  function bindCopyButtonDelegation() {
+    if (window.__devLikeCopyButtonBound) return;
+    window.__devLikeCopyButtonBound = true;
+
+    document.addEventListener('click', async (event) => {
+      const button = (event.target as HTMLElement | null)?.closest('[data-copy-button]') as HTMLElement | null;
+      if (!button) return;
+
+      const command = button.getAttribute('data-command');
+      if (!command) return;
+
+      let success = false;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(command);
+          success = true;
+        } else {
+          throw new Error('Clipboard API not available');
+        }
+      } catch {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = command;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          success = document.execCommand('copy');
+          document.body.removeChild(ta);
+        } catch {
+          success = false;
+        }
+      }
+
+      const iconCopy = button.querySelector('.icon-copy') as HTMLElement | null;
+      const iconCopied = button.querySelector('.icon-copied') as HTMLElement | null;
+      const iconFailed = button.querySelector('.icon-failed') as HTMLElement | null;
+
+      if (iconCopy && iconCopied && iconFailed) {
+        iconCopy.style.display = 'none';
+        if (success) {
+          iconCopied.style.display = 'block';
+          button.setAttribute('aria-label', 'Copied');
+          button.setAttribute('title', 'Copied');
+        } else {
+          iconFailed.style.display = 'block';
+          button.setAttribute('aria-label', 'Copy failed');
+          button.setAttribute('title', 'Copy failed');
+        }
+
+        setTimeout(() => {
+          iconCopied.style.display = 'none';
+          iconFailed.style.display = 'none';
+          iconCopy.style.display = 'block';
+          button.setAttribute('aria-label', `Copy command: ${command}`);
+          button.setAttribute('title', 'Copy');
+        }, 2000);
+      }
+    });
+  }
+
+  bindCopyButtonDelegation();
+  document.addEventListener('astro:page-load', bindCopyButtonDelegation);
+</script>
