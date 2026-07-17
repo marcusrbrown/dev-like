@@ -107,8 +107,82 @@ access to close this out. Cleanup: scratch dir removed.
 |---|---|---|
 | 1 | Claude Code plugin marketplace | **PASS** — after `"source": "."` → `"./"` manifest fix (5123b2f); `/dev-like Oxide` e2e green |
 | 2 | `npx skills add` cross-harness installer | **PASS** — correct files at `.agents/skills/`, symlinked into `.claude/skills/` |
-| 3 | GitHub Copilot CLI skill read | **BLOCKED** — no network egress to `api.github.com` in this sandbox; skill was correctly staged, Copilot auth validation never completed |
+| 3 | GitHub Copilot CLI skill read | **BLOCKED** at first attempt (no network egress); **PASS** on 2026-07-16 re-run with egress — see addendum |
 
 Codex and Cursor were not installed on this machine; both are documented `.agents/skills/`
 readers in `skills/dev-like/references/harnesses.md`, so Probe 2's result (correct files landing
 in `.agents/skills/`) is the relevant evidence for their install path too.
+
+## Addendum — 2026-07-16: Probe 3 re-run, network-enabled: **PASS**
+
+Re-ran Probe 3 in an environment with egress to `api.github.com`. Tooling: `copilot` 1.0.70
+(GitHub Copilot CLI), `gh` authenticated (`marcusrbrown`, keyring), `npx skills` (latest via npx).
+
+```
+$ curl -sI https://api.github.com
+HTTP/2 200
+
+$ mkdir /tmp/dev-like-copilot-probe && cd /tmp/dev-like-copilot-probe && git init -q
+
+$ npx -y skills add marcusrbrown/dev-like --agent copilot -y
+■  Invalid agents: copilot
+●  Valid agents: ... github-copilot ...
+[exit code: 1]
+```
+
+Correction: `--agent copilot` is not a valid target for the `npx skills` CLI — the correct agent
+name is `github-copilot`. Re-ran with the correct flag:
+
+```
+$ npx -y skills add marcusrbrown/dev-like --agent github-copilot -y
+◇  Installation Summary ──────╮
+│  ./.agents/skills/dev-like  │
+│    copy → GitHub Copilot    │
+├─────────────────────────────╯
+◇  Installed 1 skill: ✓ dev-like (copied) → ./.agents/skills/dev-like
+```
+
+Landed content (copy, not symlink, unlike the Claude Code path in Probe 2):
+
+```
+.agents/skills/dev-like/{SKILL.md,assets/,references/}
+```
+
+No `.github/skills/` directory was created; `.agents/skills/` is the path documented in
+`skills/dev-like/references/harnesses.md` (`| GitHub Copilot | .github/skills/, .agents/skills/ |
+implicit; gh skill to manage |`).
+
+```
+$ copilot -p "List the skills available to you in this project (check .agents/skills/ and
+  .github/skills/), then summarize what the dev-like skill instructs you to do." \
+  -s --no-ask-user --allow-all-tools --deny-tool='shell(git push),shell(rm:*)'
+```
+
+Copilot enumerated and read the skill file content (quoted output):
+
+```
+**Skills Available:**
+- `.agents/skills/dev-like/` – The primary skill in this project
+
+**No skills found in `.github/skills/`**
+
+---
+
+**dev-like Skill Overview:**
+
+The `dev-like` skill profiles tech companies' or developers' engineering cultures from public
+sources, then generates an installable `develop-like-<target>` skill that makes you work like
+them.
+...
+Every claim requires a provenance link (no source = no claim)
+...
+Usage: Invoke with `/dev-like <company|person>` or ask to "develop like [target]"
+```
+
+The "Every claim requires a provenance link" line is verbatim from `SKILL.md` body content, not
+inferable from the skill's frontmatter description alone — confirming Copilot actually read the
+file rather than echoing metadata. Cleanup: scratch dir removed.
+
+**Updated verdict for Probe 3: PASS.** GitHub Copilot CLI installs the skill (via
+`--agent github-copilot`, copy semantics) to `.agents/skills/` and its live agent reads and
+correctly summarizes the skill's instructions when given network egress to `api.github.com`.

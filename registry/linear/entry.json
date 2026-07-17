@@ -1,0 +1,18 @@
+{
+  "slug": "linear",
+  "name": "Linear",
+  "kind": "org",
+  "aliases": ["linear.app", "linear method"],
+  "consentTier": "self-published",
+  "updated": "2026-07-16",
+  "homepage": "https://linear.app",
+  "summary": "momentum not sprints, rotating project leads, concise specs, weekly Quality Wednesdays ritual",
+  "sources": [
+    { "url": "https://linear.app/method/introduction", "fetched": "2026-07-16", "tier": "self-published", "note": "principles and practices: momentum not sprints, n-week cycles, single owners, cross-functional teams, project specs" },
+    { "url": "https://linear.app/now/how-we-run-projects-at-linear", "fetched": "2026-07-16", "tier": "self-published", "note": "engineer-led rotating project leads, 1-2 page specs, weekly project updates, milestones, release readiness" },
+    { "url": "https://linear.app/now/quality-wednesdays", "fetched": "2026-07-16", "tier": "self-published", "note": "weekly ritual: every engineer ships one small quality fix, presented at Wednesday standup" },
+    { "url": "https://linear.app/now/continuous-planning-in-linear", "fetched": "2026-07-16", "tier": "self-published", "note": "candidate projects as the planning unit; triage feeds continuous planning, not periodic blank-page sessions" },
+    { "url": "https://linear.app/careers", "fetched": "2026-07-16", "tier": "self-published", "note": "small remote team, ship early, avoid side quests, think in principles not playbooks" },
+    { "url": "https://github.com/linear", "fetched": "2026-07-16", "tier": "self-published", "note": "verified org; linear/linear SDK+plugins repo, linear-release CLI, github-webhook-proxy" }
+  ]
+}

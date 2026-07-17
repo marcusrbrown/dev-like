@@ -2,12 +2,26 @@
   "$schema": "./schema/index.schema.json",
   "version": 1,
   "entries": {
+    "37signals": {
+      "name": "37signals",
+      "kind": "org",
+      "aliases": ["basecamp", "37signals llc", "thirtysevensignals"],
+      "consentTier": "self-published",
+      "updated": "2026-07-16"
+    },
     "every": {
       "name": "Every",
       "kind": "org",
       "aliases": ["every.to", "everyinc", "every inc"],
       "consentTier": "self-published",
       "updated": "2026-07-11"
+    },
+    "linear": {
+      "name": "Linear",
+      "kind": "org",
+      "aliases": ["linear.app", "linear method"],
+      "consentTier": "self-published",
+      "updated": "2026-07-16"
     },
     "oxide": {
       "name": "Oxide",
