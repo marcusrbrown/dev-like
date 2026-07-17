@@ -100,10 +100,13 @@ async function hasPrebuiltSkill(registryDir: string, slug: string): Promise<bool
 
 // Reuses the landing page's raw-HTML copy-button pattern (see src/content/docs/index.mdx's
 // hero button and CopyCommand.astro): a <button data-copy-button data-command=... data-umami-event=...>
-// wired up client-side by CopyCommand.astro's initCopyButtons() script, which binds any
-// [data-copy-button] element on the page regardless of which component rendered it.
+// wired up client-side by the site-wide Head override's delegated click handler
+// (src/components/Head.astro), which binds any [data-copy-button] element on the
+// page regardless of which component rendered it. The `registry-copy-button` class
+// is self-contained (see custom.css) since these buttons aren't wrapped in
+// CopyCommand.astro's .command-block-wrapper positioning context.
 function installCopyButton(command: string): string {
-  return `<button type="button" class="copy-button registry-copy-button" data-copy-button data-command="${command}" data-umami-event="install-cli-cached" aria-label="Copy command: ${command}" title="Copy"><span class="command-text">${command}</span></button>`
+  return `<button type="button" class="registry-copy-button" data-copy-button data-command="${command}" data-umami-event="install-cli-cached" aria-label="Copy command: ${command}" title="Copy"><span class="command-text">${command}</span><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-copy"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-copied" style="display:none;"><polyline points="20 6 9 17 4 12"></polyline></svg><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-failed" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>`
 }
 
 function installAffordance(slug: string, prebuilt: boolean): string {
