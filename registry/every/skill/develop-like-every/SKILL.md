@@ -59,4 +59,4 @@ See [references/stack.md](references/stack.md) for the stack and [references/wor
   "100% AI-written" framing outruns the evidence. Repo history shows human review is the
   load-bearing step. Treat the ratio as directional.
 
-Want a reviewer/pair persona in Every's voice? See [agents/every-developer.md](agents/every-developer.md).
+Want a reviewer/pair persona in Every's voice? See [personas/every-developer.md](personas/every-developer.md) — it's reference material. Claude Code users can copy it to `.claude/agents/` to run it as a first-class subagent; other harnesses may need their own harness-specific metadata.

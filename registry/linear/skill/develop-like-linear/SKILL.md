@@ -82,4 +82,4 @@ See [references/stack.md](references/stack.md) for the stack and [references/wor
   Don't extrapolate an internal stack from the open-source repos; they're developer-facing
   tooling, not necessarily what Linear's own product is built with.
 
-Want a reviewer/pair persona in Linear's voice? See [agents/linear-developer.md](agents/linear-developer.md).
+Want a reviewer/pair persona in Linear's voice? See [personas/linear-developer.md](personas/linear-developer.md) — it's reference material. Claude Code users can copy it to `.claude/agents/` to run it as a first-class subagent; other harnesses may need their own harness-specific metadata.

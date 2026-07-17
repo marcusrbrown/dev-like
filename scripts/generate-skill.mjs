@@ -116,7 +116,7 @@ export async function renderSkill(slug, registryDir) {
     'references/stack.md': stackMd,
     'references/workflow.md': workflowMd,
     'references/sources.md': sourcesMd,
-    [`agents/${slug}-developer.md`]: personaMd,
+    [`personas/${slug}-developer.md`]: personaMd,
   };
 }
 
