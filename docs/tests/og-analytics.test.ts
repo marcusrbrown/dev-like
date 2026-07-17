@@ -4,7 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { buildAnalyticsTag } from '../src/lib/analytics'
-import { buildDefaultImageOptions, buildEntryImageOptions, OG_VISUAL_OPTIONS } from '../src/lib/og-image'
+import { buildEntryImageOptions, OG_VISUAL_OPTIONS } from '../src/lib/og-image'
 import { loadRegistryOgPages } from '../src/lib/registry-og'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -111,7 +111,7 @@ describe('per-entry OG data and routes', () => {
     expect(existsSync(path.join(DIST_DIR, 'og-image.png'))).toBe(true)
   })
 
-  test('the default OG route is not shadowed by a public/ placeholder and renders the branded image', () => {
+  test('the default OG route is not shadowed by a public/ placeholder and serves the static brand banner', () => {
     const { ok, stderr } = build({ UMAMI_WEBSITE_ID: '' })
     expect(ok, `docs build failed:\n${stderr}`).toBe(true)
     expect(stderr).not.toContain('Skipping src/pages/og-image.png.ts')
@@ -121,11 +121,17 @@ describe('per-entry OG data and routes', () => {
     expect(width, 'og-image.png width').toBe(1200)
     expect(height, 'og-image.png height').toBe(630)
 
+    // og-image.png.ts serves the static banner asset (src/assets/og-image.png) verbatim rather
+    // than rendering via astro-og-canvas, so the built file should byte-match the source asset.
+    const source = readFileSync(path.join(DOCS_ROOT, 'src/assets/og-image.png'))
+    const built = readFileSync(file)
+    expect(built.equals(source), 'dist/og-image.png should byte-match src/assets/og-image.png').toBe(true)
+
+    // Sanity floor: a real photographic/branded PNG, not an empty or truncated file.
     const { size } = statSync(file)
-    expect(
-      size,
-      'og-image.png is 10000 bytes or smaller, consistent with a flat placeholder rather than the branded astro-og-canvas render (known branded output: 31,891 bytes)',
-    ).toBeGreaterThan(10_000)
+    expect(size, 'og-image.png should be a non-trivial, real image, not an empty/placeholder file').toBeGreaterThan(
+      10_000,
+    )
   }, 60_000)
 
   test('registry entry pages advertise their own OG image URL', () => {
@@ -165,16 +171,6 @@ describe('buildAnalyticsTag() (pure)', () => {
 })
 
 describe('OG image options builders (pure)', () => {
-  test('buildDefaultImageOptions() reaches the shared visual options and site title', () => {
-    const options = buildDefaultImageOptions()
-    expect(options.title).toBe('dev-like')
-    expect(options.description).toContain('Steal the workflow, not the code.')
-    expect(options.bgGradient).toEqual(OG_VISUAL_OPTIONS.bgGradient)
-    expect(options.border).toEqual(OG_VISUAL_OPTIONS.border)
-    expect(options.padding).toBe(OG_VISUAL_OPTIONS.padding)
-    expect(options.font).toEqual(OG_VISUAL_OPTIONS.font)
-  })
-
   test('buildEntryImageOptions() surfaces title, summary, consent tier, and source count, and reaches shared visual options', () => {
     const page = { title: 'Acme Corp', summary: 'Acme engineering culture profile.', meta: 'stated · 3 sources' }
     const options = buildEntryImageOptions(page)

@@ -18,14 +18,6 @@ export const OG_VISUAL_OPTIONS = {
   },
 }
 
-export function buildDefaultImageOptions() {
-  return {
-    title: 'dev-like',
-    description: 'Steal the workflow, not the code.\n\nnpx skills add marcusrbrown/dev-like',
-    ...OG_VISUAL_OPTIONS,
-  }
-}
-
 export function buildEntryImageOptions(page: RegistryOgPage) {
   return {
     title: page.title,
