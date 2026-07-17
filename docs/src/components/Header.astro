@@ -68,14 +68,14 @@ const shouldRenderSearch =
 		}
 
 		/* Registry link + search share the header's middle grid column (search
-		   previously filled that whole 1fr column on its own, pushing it toward
-		   the sidebar/content boundary). Grouping them and left-aligning keeps
-		   Registry immediately after the site title, with search pulled left
-		   right beside it instead of drifting toward the right-hand icons. */
+		   previously filled that whole 1fr column on its own). Grouping them
+		   keeps Registry immediately left of Search while right-aligning the
+		   pair toward the social-icons/theme-toggle group instead of hugging
+		   the site title. */
 		.nav-search-group {
 			align-items: center;
 			gap: 1rem;
-			justify-content: flex-start;
+			justify-content: flex-end;
 			min-width: 0;
 		}
 
