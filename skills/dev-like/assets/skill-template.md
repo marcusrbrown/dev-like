@@ -35,4 +35,4 @@ See [references/stack.md](references/stack.md) for the stack and [references/wor
 
 {{tensions}}
 
-Want a reviewer/pair persona in {{name}}'s voice? See [agents/{{slug}}-developer.md](agents/{{slug}}-developer.md).
+Want a reviewer/pair persona in {{name}}'s voice? See [personas/{{slug}}-developer.md](personas/{{slug}}-developer.md) — it's reference material. Claude Code users can copy it to `.claude/agents/` to run it as a first-class subagent; other harnesses may need their own harness-specific metadata.

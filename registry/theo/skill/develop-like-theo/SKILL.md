@@ -67,4 +67,4 @@ located first-party quote — treat it as directional, not gospel. Resolution sh
 the skill minimal (principles, not rules), version it, and delete it when it stops paying rent —
 which is itself the most develop-like-theo behavior available.
 
-Want a reviewer/pair persona in Theo Browne's voice? See [agents/theo-developer.md](agents/theo-developer.md).
+Want a reviewer/pair persona in Theo Browne's voice? See [personas/theo-developer.md](personas/theo-developer.md) — it's reference material. Claude Code users can copy it to `.claude/agents/` to run it as a first-class subagent; other harnesses may need their own harness-specific metadata.

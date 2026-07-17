@@ -8,6 +8,11 @@ GitHub Copilot uses), so Copilot CLI stood in as the "+1 more harness" for Probe
 Tooling versions: `claude` 2.1.128, `copilot` 1.0.69 (GitHub Copilot CLI), `npx skills` (latest
 via npx), `gh` (Homebrew).
 
+*Note (2026-07-16): generated skills now place the reviewer persona at
+`personas/<slug>-developer.md`; the transcripts below predate the rename and show the old
+`agents/` path for the persona file specifically (the rest of the install tree layout is
+unaffected).*
+
 ## Probe 1 — Claude Code plugin marketplace: **PASS** (after manifest fix)
 
 ```

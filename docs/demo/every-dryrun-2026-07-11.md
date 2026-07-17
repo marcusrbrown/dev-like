@@ -2,6 +2,10 @@
 
 Date: 2026-07-11 · dev-like 0.2.0 · Claude Code headless (`claude -p`, same prompt both sides)
 
+*Note (2026-07-16): generated skills now place the reviewer persona at
+`personas/<slug>-developer.md`; the transcript below predates the rename and shows the old
+`agents/` path.*
+
 ## Setup
 
 ```console

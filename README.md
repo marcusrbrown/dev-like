@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/dev-like)](https://www.npmjs.com/package/dev-like)
 [![CI](https://github.com/marcusrbrown/dev-like/actions/workflows/ci.yaml/badge.svg)](https://github.com/marcusrbrown/dev-like/actions/workflows/ci.yaml)
 [![Link Check](https://github.com/marcusrbrown/dev-like/actions/workflows/link-check.yaml/badge.svg)](https://github.com/marcusrbrown/dev-like/actions/workflows/link-check.yaml)
+[![skills.sh](https://img.shields.io/badge/skills.sh-npx%20skills%20add-blue)](https://www.skills.sh/marcusrbrown/dev-like)
 
 > Steal the workflow, not the code. `/dev-like Every` and your agent develops like the
 > shops you admire — with receipts.

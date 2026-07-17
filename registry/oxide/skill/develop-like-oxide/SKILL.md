@@ -80,4 +80,4 @@ See [references/stack.md](references/stack.md) for the stack and [references/wor
   across the org's repos — the pattern is emerging, not finished
   [[omicron PR 10628]](https://github.com/oxidecomputer/omicron/pull/10628).
 
-Want a reviewer/pair persona in Oxide's voice? See [agents/oxide-developer.md](agents/oxide-developer.md).
+Want a reviewer/pair persona in Oxide's voice? See [personas/oxide-developer.md](personas/oxide-developer.md) — it's reference material. Claude Code users can copy it to `.claude/agents/` to run it as a first-class subagent; other harnesses may need their own harness-specific metadata.

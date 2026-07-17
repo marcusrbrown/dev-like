@@ -66,7 +66,7 @@ test('generates the full tree', async () => {
       path.join('references', 'stack.md'),
       path.join('references', 'workflow.md'),
       path.join('references', 'sources.md'),
-      path.join('agents', `${SLUG}-developer.md`),
+      path.join('personas', `${SLUG}-developer.md`),
     ].sort();
 
     assert.deepEqual(files, expected, 'output tree must contain exactly the expected files');

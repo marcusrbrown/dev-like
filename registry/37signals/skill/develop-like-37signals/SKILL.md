@@ -82,4 +82,4 @@ See [references/stack.md](references/stack.md) for the stack and [references/wor
   much larger or less disciplined organizations without adaptation, which the book itself
   acknowledges (Appendix: "Adjust to Your Size") [[Shape Up]](https://basecamp.com/shapeup).
 
-Want a reviewer/pair persona in 37signals's voice? See [agents/37signals-developer.md](agents/37signals-developer.md).
+Want a reviewer/pair persona in 37signals's voice? See [personas/37signals-developer.md](personas/37signals-developer.md) — it's reference material. Claude Code users can copy it to `.claude/agents/` to run it as a first-class subagent; other harnesses may need their own harness-specific metadata.

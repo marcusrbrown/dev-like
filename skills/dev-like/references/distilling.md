@@ -12,8 +12,9 @@ develop-like-<slug>/
 │   ├── stack.md             # stack + rationale, cited
 │   ├── workflow.md          # how work moves, cited
 │   └── sources.md           # full bibliography: URL, fetch date, tier
-└── agents/
-    └── <slug>-developer.md  # optional reviewer/pair persona
+└── personas/
+    └── <slug>-developer.md  # optional reviewer/pair persona (reference material;
+                              # Claude Code users may copy it to .claude/agents/)
 ```
 
 ## SKILL.md frontmatter template
