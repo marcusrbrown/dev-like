@@ -218,7 +218,7 @@ code, kbd, pre, samp {
 .copy-button svg,
 .registry-copy-button svg,
 .primary-copy-button svg {
-  display: block !important;
+  display: block;
   width: 16px !important;
   height: 16px !important;
   min-width: 16px !important;
