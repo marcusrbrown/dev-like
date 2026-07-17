@@ -17,9 +17,9 @@ const shouldRenderSearch =
 <div class="header">
 	<div class="title-wrapper sl-flex">
 		<SiteTitle />
-		<a href="/dev-like/registry/" class="header-registry-link">Registry</a>
 	</div>
-	<div class="sl-flex print:hidden">
+	<div class="sl-flex print:hidden nav-search-group">
+		<a href="/dev-like/registry/" class="header-registry-link">Registry</a>
 		{shouldRenderSearch && <Search />}
 	</div>
 	<div class="sl-hidden md:sl-flex print:hidden right-group">
@@ -65,6 +65,18 @@ const shouldRenderSearch =
 		.header-registry-link:hover,
 		.header-registry-link:focus-visible {
 			color: var(--accent-highlighter);
+		}
+
+		/* Registry link + search share the header's middle grid column (search
+		   previously filled that whole 1fr column on its own). Grouping them
+		   keeps Registry immediately left of Search while right-aligning the
+		   pair toward the social-icons/theme-toggle group instead of hugging
+		   the site title. */
+		.nav-search-group {
+			align-items: center;
+			gap: 1rem;
+			justify-content: flex-end;
+			min-width: 0;
 		}
 
 		.right-group,
