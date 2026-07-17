@@ -199,6 +199,35 @@ code, kbd, pre, samp {
   white-space: nowrap;
 }
 
+/* Starlight's markdown.css applies `.sl-markdown-content svg { display: block;
+   max-width: 100%; height: auto; }` to any svg inside its markdown content
+   wrapper, which the Install section and registry pages both are (the hero
+   button isn't, which is why only it rendered correctly). That rule strips our
+   icons' intrinsic square sizing, causing the copied-state checkmark to
+   balloon to an unconstrained/aspect-distorted box and shift out of alignment.
+   Pin explicit, fixed dimensions on every copy-button icon state so the swap
+   between idle/copied/failed never changes the icon's box size or position,
+   and constrain each button to a stable icon slot so the button itself never
+   resizes across state changes. */
+.copy-button svg,
+.registry-copy-button svg,
+.primary-copy-button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  max-width: 16px;
+  max-height: 16px;
+  flex-shrink: 0;
+}
+
+.copy-button,
+.registry-copy-button {
+  min-width: 2rem;
+  min-height: 2rem;
+}
+
 @media (max-width: 768px) {
   .grid-layout {
     grid-template-columns: 1fr;
