@@ -66,6 +66,5 @@ rests on third-party coverage
 located first-party quote — treat it as directional, not gospel. Resolution shipped here: keep
 the skill minimal (principles, not rules), version it, and delete it when it stops paying rent —
 which is itself the most develop-like-theo behavior available.
-</content>
 
 Want a reviewer/pair persona in Theo Browne's voice? See [agents/theo-developer.md](agents/theo-developer.md).

@@ -85,16 +85,95 @@ test('validate fails when a registry entry is missing a required generation sect
   }
 });
 
-test('validate fails when a committed prebuilt skill/ tree has drifted from profile.md', async () => {
-  // Real fixture: copy the `every` registry entry, then hand-edit the committed
-  // SKILL.md so it no longer matches fresh regeneration.
+async function makeDriftFixture() {
+  // Isolated fixture: copy only the `every` registry entry, with a minimal
+  // single-entry index.json (mirrors the missing-section fixture above) so the
+  // outcome is driven solely by whether the committed skill/ tree matches
+  // regeneration — not by unrelated entries missing from a copied full index.
   const regDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dev-like-validate-drift-'));
-  try {
-    const slug = 'every';
-    await fs.cp(path.join(ROOT, 'registry', slug), path.join(regDir, slug), { recursive: true });
-    await fs.writeFile(path.join(regDir, 'index.json'), await fs.readFile(path.join(ROOT, 'registry', 'index.json'), 'utf8'));
+  const slug = 'every';
+  await fs.cp(path.join(ROOT, 'registry', slug), path.join(regDir, slug), { recursive: true });
 
-    const skillMdPath = path.join(regDir, slug, 'skill', `develop-like-${slug}`, 'SKILL.md');
+  const realEntry = JSON.parse(await fs.readFile(path.join(regDir, slug, 'entry.json'), 'utf8'));
+  const index = { entries: { [slug]: { consentTier: realEntry.consentTier, updated: realEntry.updated } } };
+  await fs.writeFile(path.join(regDir, 'index.json'), JSON.stringify(index, null, 2), 'utf8');
+
+  return { regDir, skillMdPath: path.join(regDir, slug, 'skill', `develop-like-${slug}`, 'SKILL.md') };
+}
+
+test('drift fixture is isolated: validate() passes when untampered', async () => {
+  const { regDir } = await makeDriftFixture();
+  try {
+    const passed = await silently(() => validate({ regDir }));
+    assert.equal(passed, true, 'untampered single-entry fixture must pass validate() on its own');
+  } finally {
+    await fs.rm(regDir, { recursive: true, force: true });
+  }
+});
+
+test('validate fails when a profile.md section contains a raw HTML/JSX tag', async () => {
+  const regDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dev-like-validate-htmltag-'));
+  try {
+    const slug = 'tagged';
+    const slugDir = path.join(regDir, slug);
+    await fs.mkdir(slugDir, { recursive: true });
+
+    const entry = {
+      slug,
+      name: 'Tagged Fixture',
+      kind: 'org',
+      consentTier: 'self-published',
+      updated: '2026-07-11',
+      sources: [
+        { url: 'https://example.com/source', fetched: '2026-07-11', tier: 'self-published' },
+      ],
+    };
+    await fs.writeFile(path.join(slugDir, 'entry.json'), JSON.stringify(entry, null, 2), 'utf8');
+
+    const profile = [
+      '# Tagged Fixture — dev culture profile',
+      '',
+      '## Identity',
+      '',
+      'A fixture entry. [[source]](https://example.com/source)',
+      '',
+      '## Core principle',
+      '',
+      'n/a',
+      '',
+      '## Workflow shape',
+      '',
+      'n/a',
+      '',
+      '## Stack',
+      '',
+      'n/a',
+      '',
+      '## Principles (cited)',
+      '',
+      '1. n/a',
+      '',
+      '## Tensions',
+      '',
+      'Some stray copy-paste artifact leaked in.',
+      '</content>',
+      '',
+    ].join('\n');
+    await fs.writeFile(path.join(slugDir, 'profile.md'), profile, 'utf8');
+
+    const index = { entries: { [slug]: { consentTier: entry.consentTier, updated: entry.updated } } };
+    await fs.writeFile(path.join(regDir, 'index.json'), JSON.stringify(index, null, 2), 'utf8');
+
+    const passed = await silently(() => validate({ regDir }));
+    assert.equal(passed, false, 'validate() must fail when a profile.md section contains a raw HTML/JSX tag');
+  } finally {
+    await fs.rm(regDir, { recursive: true, force: true });
+  }
+});
+
+test('validate fails when a committed prebuilt skill/ tree has drifted from profile.md', async () => {
+  const { regDir, skillMdPath } = await makeDriftFixture();
+  try {
     const original = await fs.readFile(skillMdPath, 'utf8');
     await fs.writeFile(skillMdPath, original + '\ntampered\n', 'utf8');
 

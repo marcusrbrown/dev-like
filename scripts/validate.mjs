@@ -6,7 +6,7 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { renderSkill } from './generate-skill.mjs';
+import { renderSkill, parseSections } from './generate-skill.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -18,6 +18,12 @@ const TIERS = ['self-published', 'stated', 'observed', 'social'];
 const PERSON_TIERS = ['self-published', 'stated'];
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// Mirrors docs/scripts/generate-registry-pages.ts's HTML_JSX_TAG_RE — keep the two in sync.
+// Catches things like a stray copy-paste `</content>` tag reaching profile.md, which the
+// docs build rejects at generation time; we want the same class of bug to fail at
+// `validate.mjs` time instead of surfacing only when someone runs the docs build.
+const HTML_JSX_TAG_RE = /<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^>]*)?>/;
 
 let failures = 0;
 const fail = (msg) => { failures++; console.error(`FAIL ${msg}`); };
@@ -91,7 +97,14 @@ async function validateRegistry(regDir = join(ROOT, 'registry')) {
 
     const profile = await readFile(join(regDir, slug, 'profile.md'), 'utf8').catch(() => null);
     if (!profile) fail(`${slug}: missing profile.md`);
-    else if (!/\[\[?.+?\]?\]\(https?:\/\//.test(profile)) fail(`${slug}: profile.md has no source links`);
+    else {
+      if (!/\[\[?.+?\]?\]\(https?:\/\//.test(profile)) fail(`${slug}: profile.md has no source links`);
+      for (const [sectionName, body] of Object.entries(parseSections(profile))) {
+        if (HTML_JSX_TAG_RE.test(body)) {
+          fail(`${slug}: profile.md section "${sectionName}" contains raw HTML/JSX tags, which are not allowed in generated output`);
+        }
+      }
+    }
 
     if (!index.entries[slug]) fail(`${slug}: not in index.json`);
     else {
