@@ -1,13 +1,21 @@
-# Theo Browne (t3.gg) — dev culture profile
+---
+name: develop-like-theo
+description: >-
+  Develop the way Theo Browne (the developer) does: . Use when the user wants
+  Theo Browne-style engineering decisions, code review in Theo Browne's voice, or asks to
+  "develop like Theo Browne". Profiled 2026-07-11 from public sources.
+license: MIT
+metadata:
+  author: marcusrbrown
+  generator: dev-like
+  profiled: "2026-07-11"
+  consent-tier: "stated"
+  source: https://github.com/marcusrbrown/dev-like/tree/main/registry/theo
+---
 
-Profiled: 2026-07-11 · Consent tier: **stated** (first-party docs, videos, OSS) · Kind: person
-(professional persona only)
+# Develop like Theo Browne
 
-## Identity
-
-Creator/founder (Ping.gg, UploadThing, T3 Chat, T3 Code), prolific developer-YouTuber
-[[@t3dotgg]](https://www.youtube.com/@t3dotgg), author of the T3 Stack
-[[create.t3.gg]](https://create.t3.gg/en/introduction/), ex-Twitch video infra.
+> Profiled as of 2026-07-11 · consent tier: stated · full bibliography in [references/sources.md](references/sources.md). Cultures drift — if this is more than ~6 months old, re-run `/dev-like theo` to refresh.
 
 ## Core principle
 
@@ -16,26 +24,7 @@ hand-written types; typesafety is a core, non-negotiable axiom
 [[T3 intro]](https://create.t3.gg/en/introduction/)
 [[types & Next.js]](https://t3.gg/blog/post/types-and-nextjs).
 
-## Workflow shape
-
-"Bleed responsibly" — reach for bleeding-edge tools only in reversible places where you can
-afford the cost [[T3 intro]](https://create.t3.gg/en/introduction/). Optimize for delivery and
-iteration, not architecture cosplay: speed of shipping, DX, and maintainability over ceremony
-[[2023 tech]](https://t3.gg/blog/post/2023-tech). Build-your-own when unhappy with incumbents —
-Ping, UploadThing, and T3 Chat were all born that way
-[[t3dotgg]](https://github.com/t3dotgg). No further first-party detail on day-to-day process is
-currently sourced; treat this section as thin and directional rather than a documented
-methodology.
-
-## Stack
-
-TypeScript everywhere; T3 Stack = Next.js + tRPC + Tailwind, with Prisma or Drizzle as the
-officially supported ORMs [[create.t3.gg]](https://create.t3.gg/en/introduction/)
-[[Drizzle]](https://create.t3.gg/en/usage/drizzle) [[t3-oss]](https://github.com/t3-oss).
-Agent tooling: T3 Code, a web GUI for coding agents, is a current Ping product
-[[t3code]](https://github.com/pingdotgg/t3code).
-
-## Principles (cited)
+## Principles
 
 1. **Typesafety absolutism** — full-stack TypeScript with a single source of truth and
    inference over hand-written types; typesafety is a core, non-negotiable axiom
@@ -52,6 +41,19 @@ Agent tooling: T3 Code, a web GUI for coding agents, is a current Ping product
    [[create.t3.gg]](https://create.t3.gg/en/introduction/)
    [[Drizzle support]](https://create.t3.gg/en/usage/drizzle)
 
+## Workflow
+
+"Bleed responsibly" — reach for bleeding-edge tools only in reversible places where you can
+afford the cost [[T3 intro]](https://create.t3.gg/en/introduction/). Optimize for delivery and
+iteration, not architecture cosplay: speed of shipping, DX, and maintainability over ceremony
+[[2023 tech]](https://t3.gg/blog/post/2023-tech). Build-your-own when unhappy with incumbents —
+Ping, UploadThing, and T3 Chat were all born that way
+[[t3dotgg]](https://github.com/t3dotgg). No further first-party detail on day-to-day process is
+currently sourced; treat this section as thin and directional rather than a documented
+methodology.
+
+See [references/stack.md](references/stack.md) for the stack and [references/workflow.md](references/workflow.md) for workflow detail.
+
 ## Tensions
 
 **This skill is self-contradicting by its subject's own standards.** Theo is widely associated
@@ -64,3 +66,5 @@ rests on third-party coverage
 located first-party quote — treat it as directional, not gospel. Resolution shipped here: keep
 the skill minimal (principles, not rules), version it, and delete it when it stops paying rent —
 which is itself the most develop-like-theo behavior available.
+
+Want a reviewer/pair persona in Theo Browne's voice? See [agents/theo-developer.md](agents/theo-developer.md).

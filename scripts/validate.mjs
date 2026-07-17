@@ -6,12 +6,24 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { renderSkill, parseSections } from './generate-skill.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+async function fssExists(path) {
+  return stat(path).then(() => true).catch(() => false);
+}
+
 const TIERS = ['self-published', 'stated', 'observed', 'social'];
 const PERSON_TIERS = ['self-published', 'stated'];
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// Mirrors docs/scripts/generate-registry-pages.ts's HTML_JSX_TAG_RE — keep the two in sync.
+// Catches things like a stray copy-paste `</content>` tag reaching profile.md, which the
+// docs build rejects at generation time; we want the same class of bug to fail at
+// `validate.mjs` time instead of surfacing only when someone runs the docs build.
+const HTML_JSX_TAG_RE = /<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^>]*)?>/;
 
 let failures = 0;
 const fail = (msg) => { failures++; console.error(`FAIL ${msg}`); };
@@ -55,8 +67,7 @@ async function validateSkills() {
   }
 }
 
-async function validateRegistry() {
-  const regDir = join(ROOT, 'registry');
+async function validateRegistry(regDir = join(ROOT, 'registry')) {
   const index = JSON.parse(await readFile(join(regDir, 'index.json'), 'utf8'));
   const dirs = [];
   for (const name of await readdir(regDir)) {
@@ -86,7 +97,14 @@ async function validateRegistry() {
 
     const profile = await readFile(join(regDir, slug, 'profile.md'), 'utf8').catch(() => null);
     if (!profile) fail(`${slug}: missing profile.md`);
-    else if (!/\[\[?.+?\]?\]\(https?:\/\//.test(profile)) fail(`${slug}: profile.md has no source links`);
+    else {
+      if (!/\[\[?.+?\]?\]\(https?:\/\//.test(profile)) fail(`${slug}: profile.md has no source links`);
+      for (const [sectionName, body] of Object.entries(parseSections(profile))) {
+        if (HTML_JSX_TAG_RE.test(body)) {
+          fail(`${slug}: profile.md section "${sectionName}" contains raw HTML/JSX tags, which are not allowed in generated output`);
+        }
+      }
+    }
 
     if (!index.entries[slug]) fail(`${slug}: not in index.json`);
     else {
@@ -94,6 +112,30 @@ async function validateRegistry() {
       if (ie.consentTier !== entry.consentTier) fail(`${slug}: index/entry consentTier drift`);
       if (ie.updated !== entry.updated) fail(`${slug}: index/entry updated drift`);
     }
+
+    // Every entry must generate cleanly in-memory — catches profile.md missing a
+    // required section before it ever bites an end user via `npx dev-like <slug>`.
+    let generated = null;
+    try {
+      generated = await renderSkill(slug, regDir);
+    } catch (err) {
+      fail(err.message);
+    }
+
+    // If a prebuilt skill/ tree is committed, it must match fresh regeneration exactly,
+    // so a stale committed tree can't silently drift from profile.md/entry.json.
+    if (generated) {
+      const dirName = `develop-like-${slug}`;
+      const skillDir = join(regDir, slug, 'skill', dirName);
+      if (await fssExists(skillDir)) {
+        for (const [rel, content] of Object.entries(generated)) {
+          const committed = await readFile(join(skillDir, rel), 'utf8').catch(() => null);
+          if (committed === null) fail(`${slug}: prebuilt skill/ missing ${rel} (regenerate with generate-skill.mjs)`);
+          else if (committed !== content) fail(`${slug}: prebuilt skill/${rel} drifted from profile.md/entry.json (regenerate with generate-skill.mjs)`);
+        }
+      }
+    }
+
     ok(`registry ${slug}`);
   }
 
@@ -102,9 +144,10 @@ async function validateRegistry() {
   }
 }
 
-export async function validate() {
+export async function validate({ regDir } = {}) {
+  failures = 0;
   await validateSkills();
-  await validateRegistry();
+  await validateRegistry(regDir);
   if (failures) console.error(`\n${failures} failure(s)`);
   else console.log('\nAll checks passed.');
   return failures === 0;

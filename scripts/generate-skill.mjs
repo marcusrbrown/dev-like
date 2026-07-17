@@ -26,7 +26,7 @@ function parseArgs(argv) {
 }
 
 // Split profile.md on `## ` headings into a map of heading text -> trimmed body.
-function parseSections(text) {
+export function parseSections(text) {
   const sections = {};
   const parts = text.split(/^## /m).slice(1); // drop content before first '## '
   for (const part of parts) {
