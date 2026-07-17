@@ -98,10 +98,19 @@ async function hasPrebuiltSkill(registryDir: string, slug: string): Promise<bool
   }
 }
 
+// Reuses the landing page's raw-HTML copy-button pattern (see src/content/docs/index.mdx's
+// hero button and CopyCommand.astro): a <button data-copy-button data-command=... data-umami-event=...>
+// wired up client-side by CopyCommand.astro's initCopyButtons() script, which binds any
+// [data-copy-button] element on the page regardless of which component rendered it.
+function installCopyButton(command: string): string {
+  return `<button type="button" class="copy-button registry-copy-button" data-copy-button data-command="${command}" data-umami-event="install-cli-cached" aria-label="Copy command: ${command}" title="Copy"><span class="command-text">${command}</span></button>`
+}
+
 function installAffordance(slug: string, prebuilt: boolean): string {
   if (prebuilt) {
+    const command = `npx dev-like ${slug}`
     return [
-      `Install: \`npx dev-like ${slug}\``,
+      `Install: ${installCopyButton(command)}`,
       `Prebuilt skill: [SKILL.md](https://github.com/marcusrbrown/dev-like/blob/main/registry/${slug}/skill/develop-like-${slug}/SKILL.md)`,
     ].join('\n\n')
   }
@@ -197,6 +206,8 @@ function renderIndex(orderedSlugs: string[], entries: Record<string, RegistryInd
     '| Name | Kind | Consent tier | Updated |',
     '| --- | --- | --- | --- |',
     ...rows,
+    '',
+    'Don\u2019t see the shop you want? <a href="https://github.com/marcusrbrown/dev-like/issues/new?template=profile-request.yml" data-umami-event="request-profile">Request a profile</a>.',
     '',
   ].join('\n')
 
