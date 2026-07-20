@@ -1,27 +1,16 @@
 ---
-title: openai-imagegen edit_image.ts fails through CLIProxy with octet-stream MIME
-date: "2026-07-20"
-category: docs/solutions/integration-issues/
+title: "openai-imagegen edit_image.ts fails through CLIProxy with octet-stream MIME"
+date: 2026-07-20
+category: integration-issues
 module: openai-imagegen
 problem_type: integration_issue
 component: tooling
-symptoms:
-  - "CLIProxy returned HTTP 400 for edit_image.ts multipart image uploads"
-  - "Upstream rejected images[0].image_url as unsupported MIME application/octet-stream"
-  - "generate_image.ts (JSON body) worked; only multipart edit_image.ts failed"
-root_cause: wrong_api
-resolution_type: code_fix
 severity: medium
-related_components:
-  - cliproxy
-  - bun
-tags:
-  - openai-imagegen
-  - cliproxy
-  - bun
-  - multipart
-  - mime-type
-  - image-edit
+applies_when:
+  - "editing or composing an image via openai-imagegen edit_image.ts"
+  - "routing image API calls through CLIProxy or another OpenAI-compatible proxy"
+  - "appending a Bun File/Blob to a multipart form without setting its MIME type"
+tags: [openai-imagegen, cliproxy, bun, multipart, mime-type, image-edit]
 ---
 
 # openai-imagegen edit_image.ts fails through CLIProxy with octet-stream MIME
