@@ -1,5 +1,16 @@
 # dev-like
 
+## 0.4.0
+
+### Minor Changes
+
+- 8f5e30a: Add 37signals and Linear registry entries; harness support matrix, oxide demo, Copilot verification addendum.
+
+### Patch Changes
+
+- 1a2f5fc: Fix theo profile generation and validate that every registry entry generates cleanly
+- f5d3c5f: Move generated skill persona to `personas/<slug>-developer.md` (was `agents/`) — `agents/` is reserved for harness metadata (e.g. OpenAI Codex's `agents/openai.yaml`). SKILL.md now notes the persona is reference material and Claude Code users can copy it to `.claude/agents/` to run it as a first-class subagent.
+
 ## 0.3.1
 
 ### Patch Changes
