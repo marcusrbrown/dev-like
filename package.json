@@ -17,7 +17,7 @@
     "type": "git",
     "url": "git+https://github.com/marcusrbrown/dev-like.git"
   },
-  "homepage": "https://github.com/marcusrbrown/dev-like#readme",
+  "homepage": "https://mrbro.dev/dev-like/",
   "type": "module",
   "bin": {
     "dev-like": "bin/cli.mjs"
