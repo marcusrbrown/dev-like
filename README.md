@@ -2,15 +2,18 @@
   <img src=".github/social-preview.png" alt="dev-like — steal the workflow, not the code" width="640">
 </p>
 
+<h1 align="center">dev-like</h1>
+
+<p align="center">
+  <i>Steal the workflow, not the code. <code>/dev-like Every</code> and your agent develops like the shops you admire — with receipts.</i>
+</p>
+
 <p align="center">
   <a href="https://www.npmjs.com/package/dev-like"><img src="https://img.shields.io/npm/v/dev-like?style=for-the-badge&logo=npm&color=00d0c7&labelColor=13131c" alt="npm"></a>
   <a href="https://github.com/marcusrbrown/dev-like/actions/workflows/ci.yaml"><img src="https://img.shields.io/github/actions/workflow/status/marcusrbrown/dev-like/ci.yaml?style=for-the-badge&logo=github&label=CI&color=00d0c7&labelColor=13131c" alt="CI"></a>
   <a href="https://github.com/marcusrbrown/dev-like/actions/workflows/link-check.yaml"><img src="https://img.shields.io/github/actions/workflow/status/marcusrbrown/dev-like/link-check.yaml?style=for-the-badge&logo=github&label=Link%20Check&color=00d0c7&labelColor=13131c" alt="Link Check"></a>
   <a href="https://www.skills.sh/marcusrbrown/dev-like"><img src="https://img.shields.io/badge/skills.sh-npx%20skills%20add-00d0c7?style=for-the-badge&labelColor=13131c" alt="skills.sh"></a>
 </p>
-
-> Steal the workflow, not the code. `/dev-like Every` and your agent develops like the
-> shops you admire — with receipts.
 
 `dev-like` profiles a tech company or developer's engineering culture from **public sources
 only** (their shipped agent configs, linter configs, CI files, engineering blogs, talks) and
