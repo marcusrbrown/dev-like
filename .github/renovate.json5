@@ -1,0 +1,17 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  description: 'Use the shared config preset for the dev-like repository',
+  extends: ['local>marcusrbrown/renovate-config', 'github>sanity-io/renovate-config:semantic-commit-type'],
+  // Evaluation fixtures carry intentionally pinned dependencies and are not shipped or
+  // installed in CI. Preserve Renovate's default node_modules/bower ignores because setting
+  // this key replaces the defaults.
+  ignorePaths: ['**/node_modules/**', '**/bower_components/**', 'evals/**'],
+  packageRules: [
+    {
+      description: 'Only allow LTS versions of Node.js in GitHub Actions',
+      matchManagers: ['github-actions'],
+      matchPackageNames: ['node'],
+      allowedVersions: '/^([0-9]*[02468])$/',
+    },
+  ],
+}
