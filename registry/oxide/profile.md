@@ -22,28 +22,28 @@ not a bureaucratic artifact [[a tool for discussion]](https://oxide.computer/blo
 
 ## Workflow shape
 
-Decisions move through explicit RFD states — prediscussion → ideation → discussion →
-published → committed/abandoned — with discussion happening in GitHub PRs
-[[RFD 1]](https://rfd.shared.oxide.computer/rfd/0001). Engineering work itself has named
-phases: scoping → exploration → prototyping → determination → development → validation →
-stress → production [[RFD 5]](https://rfd.shared.oxide.computer/rfd/0005). Decision values
-are explicit and include both rigor *and* urgency — analysis is not allowed to become
-avoidance [[RFD 113]](https://rfd.shared.oxide.computer/rfd/0113).
+Move each decision through explicit RFD states — prediscussion → ideation → discussion →
+published → committed/abandoned — and discuss it in GitHub PRs
+[[RFD 1]](https://rfd.shared.oxide.computer/rfd/0001). Name the engineering phase before
+acting: scoping → exploration → prototyping → determination → development → validation →
+stress → production [[RFD 5]](https://rfd.shared.oxide.computer/rfd/0005). Apply both rigor and
+urgency; do not let analysis become avoidance
+[[RFD 113]](https://rfd.shared.oxide.computer/rfd/0113).
 
-Day to day: remote-first with recorded meetings, no formalized performance review, no
-engineering metrics, and a weekly Demo Friday — show working things continuously
+Work remote-first, record meetings, avoid formalized performance reviews and engineering
+metrics, and show working things continuously at a weekly Demo Friday
 [[engineering culture]](https://oxide.computer/blog/engineering-culture). Hardware teams
-work distributed by investing in prototyping tooling; teams "don't need approval or
-sign-off, we just go do what's right"
+work distributed by investing in prototyping tooling; do not wait for approval or sign-off —
+"we just go do what's right"
 [[remote hardware]](https://oxide.computer/blog/building-big-systems-with-remote-hardware-teams).
-Baseline hygiene is non-negotiable: cargo check, clippy, rustfmt, nextest in the loop; CI
-runs on buildomat, their first-party job orchestrator — when the tool you need doesn't
-exist, you build it [[omicron PR 10628]](https://github.com/oxidecomputer/omicron/pull/10628)
+Keep cargo check, clippy, rustfmt, and nextest in the loop; run CI on buildomat, and build
+the tool you need when it does not exist
+[[omicron PR 10628]](https://github.com/oxidecomputer/omicron/pull/10628)
 [[buildomat]](https://github.com/oxidecomputer/buildomat). Long-running control-plane
-operations are modeled as observable, recoverable sagas rather than fire-and-forget scripts
+operations as observable, recoverable sagas rather than fire-and-forget scripts
 [[RFD 107]](https://rfd.shared.oxide.computer/rfd/0107). Agent-era note: repos carry both
-CLAUDE.md and AGENTS.md ("that covers all agent harnesses in wide use"), with nested,
-generated, code-local agent instructions over one giant top-level file
+CLAUDE.md and AGENTS.md ("that covers all agent harnesses in wide use"); keep agent
+instructions nested, generated, and code-local rather than in one giant top-level file
 [[omicron PR 10628]](https://github.com/oxidecomputer/omicron/pull/10628).
 
 ## Stack

@@ -27,6 +27,9 @@ metadata:
 
 ## Workflow
 
+Execute these checkpoints before and during the task. Treat them as required actions, not
+background description:
+
 {{workflowShape}}
 
 See [references/stack.md](references/stack.md) for the stack and [references/workflow.md](references/workflow.md) for workflow detail.
