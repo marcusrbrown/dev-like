@@ -141,3 +141,5 @@ against the manual publish time.
 ## Related
 
 - DESIGN.md — Ecosystem constraints, Distribution & launch surface (provenance/OIDC rationale)
+- `docs/solutions/integration-issues/renovate-pinned-dependency-without-bun-lockfile-refresh-2026-07-20.md`
+  — the Renovate-automation angle of the same `bun install --frozen-lockfile` invariant
