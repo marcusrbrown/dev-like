@@ -1,5 +1,13 @@
 # dev-like
 
+## 0.4.1
+
+### Patch Changes
+
+- 6601cc2: Rewrite generated skill Workflow sections as imperative, checkpointed steps so workflow discipline transfers (#23).
+- 01d7a34: Generated workflows now name a concrete pre-code artifact when a profiled culture expects one. The Oxide skill's workflow step now requires a short RFD-style decision record (problem, options considered, chosen approach with tradeoffs, failure modes/validation) for a meaningful design choice, before implementation (#23).
+- f25e596: Claude plugin and skill metadata now stay synchronized with package releases: `.claude-plugin/plugin.json` and the `dev-like` skill's frontmatter version are automatically kept in lockstep with `package.json`, and `bun run validate` catches drift before it ships.
+
 ## 0.4.0
 
 ### Minor Changes
