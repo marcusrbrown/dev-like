@@ -302,3 +302,40 @@ test('missing section fails loud', async () => {
     await fs.rm(registryDir, { recursive: true, force: true });
   }
 });
+
+test('oxide workflow names a pre-code decision artifact', async () => {
+  const outDir = await mktmp();
+  try {
+    const res = runGenerator(['oxide', '--out', outDir]);
+    assert.equal(res.status, 0, `generator failed: ${res.stderr}`);
+
+    const workflowMd = await fs.readFile(
+      path.join(outDir, 'develop-like-oxide', 'references', 'workflow.md'),
+      'utf8',
+    );
+
+    // Must name a concrete artifact (e.g. a file), not just describe the RFD culture.
+    assert.match(
+      workflowMd,
+      /`RFD-[\w-]*\.md`/,
+      'expected the workflow to name a concrete decision-record filename before code',
+    );
+
+    // Must state minimum contents.
+    for (const term of ['problem', 'options considered', 'tradeoffs', 'failure modes']) {
+      assert.ok(
+        workflowMd.toLowerCase().includes(term),
+        `expected workflow.md to state minimum artifact contents including "${term}"`,
+      );
+    }
+
+    // Must require producing it before implementation.
+    assert.match(
+      workflowMd,
+      /before implementation/i,
+      'expected workflow.md to require the artifact before implementation',
+    );
+  } finally {
+    await fs.rm(outDir, { recursive: true, force: true });
+  }
+});

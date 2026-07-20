@@ -63,3 +63,8 @@ the agent listed four deliberate out-of-scope items. It did not transfer Oxide's
 decision-doc-first behavior: the agent still reasoned in its final response and went straight
 to code. This is a mixed result, not a clean fix; the n=2 evidence now contains one positive
 workflow-discipline transfer and one unchanged miss.
+
+**Follow-up (2026-07-20):** a later artifact-first revision names a concrete pre-code
+decision record and produced RFD-first artifacts in 2/2 fresh runs — see
+[oxide-artifact-first-eval-2026-07-20.md](oxide-artifact-first-eval-2026-07-20.md). The
+negative result documented above remains the baseline; it is not rewritten.

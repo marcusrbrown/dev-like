@@ -22,12 +22,16 @@ not a bureaucratic artifact [[a tool for discussion]](https://oxide.computer/blo
 
 ## Workflow shape
 
-Move each decision through explicit RFD states — prediscussion → ideation → discussion →
-published → committed/abandoned — and discuss it in GitHub PRs
-[[RFD 1]](https://rfd.shared.oxide.computer/rfd/0001). Name the engineering phase before
-acting: scoping → exploration → prototyping → determination → development → validation →
-stress → production [[RFD 5]](https://rfd.shared.oxide.computer/rfd/0005). Apply both rigor and
-urgency; do not let analysis become avoidance
+For a meaningful design choice, before implementation write a short RFD-style decision
+record (e.g. `RFD-topic-slug.md`) containing: the problem/decision, options considered, the
+chosen approach with tradeoffs, and failure modes/validation — this is a lightweight record
+in the spirit of Oxide's RFD process, not a full formal RFD for every edit
+[[RFD 1]](https://rfd.shared.oxide.computer/rfd/0001). Move it through explicit RFD states —
+prediscussion → ideation → discussion → published → committed/abandoned — and discuss it in
+GitHub PRs [[RFD 1]](https://rfd.shared.oxide.computer/rfd/0001). Name the engineering phase
+before acting: scoping → exploration → prototyping → determination → development →
+validation → stress → production [[RFD 5]](https://rfd.shared.oxide.computer/rfd/0005). Apply
+both rigor and urgency; do not let analysis become avoidance
 [[RFD 113]](https://rfd.shared.oxide.computer/rfd/0113).
 
 Work remote-first, record meetings, avoid formalized performance reviews and engineering
