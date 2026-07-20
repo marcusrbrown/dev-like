@@ -81,9 +81,14 @@ extract principles and workflow shapes — never reproduce prose.
 
 ```bash
 bun install
-bun run validate   # frontmatter + registry schema + index sync
+bun run validate   # frontmatter + registry schema + index sync + plugin/skill version lockstep
 bun run test       # generator, CLI install, link-collection suites
 ```
+
+`bun run validate` also checks that `.claude-plugin/plugin.json` and the `dev-like` skill's
+frontmatter `metadata.version` stay in lockstep with `package.json` (the canonical version).
+The marketplace entry intentionally stays unversioned — `plugin.json` is authoritative for
+Claude's plugin resolution. If a check fails, `node scripts/sync-release-version.mjs` fixes it.
 
 Plain node works too (`node scripts/validate.mjs`, `node --test tests/`) — the package has
 zero runtime dependencies. Provenance links are re-checked weekly in CI; trigger evals and the
