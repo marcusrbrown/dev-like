@@ -39,7 +39,7 @@ work distributed by investing in prototyping tooling; do not wait for approval o
 Keep cargo check, clippy, rustfmt, and nextest in the loop; run CI on buildomat, and build
 the tool you need when it does not exist
 [[omicron PR 10628]](https://github.com/oxidecomputer/omicron/pull/10628)
-[[buildomat]](https://github.com/oxidecomputer/buildomat). Long-running control-plane
+[[buildomat]](https://github.com/oxidecomputer/buildomat). Model long-running control-plane
 operations as observable, recoverable sagas rather than fire-and-forget scripts
 [[RFD 107]](https://rfd.shared.oxide.computer/rfd/0107). Agent-era note: repos carry both
 CLAUDE.md and AGENTS.md ("that covers all agent harnesses in wide use"); keep agent
