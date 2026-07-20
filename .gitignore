@@ -8,3 +8,4 @@ HANDOFF.md
 docs/.astro/
 docs/src/content/docs/_generated/
 .env
+.github/social-preview.png
