@@ -46,7 +46,9 @@ source.
 
 | Slug | Kind | Consent tier | Skill |
 |------|------|--------------|-------|
+| [`37signals`](registry/37signals/) | org | self-published | [develop-like-37signals](registry/37signals/skill/develop-like-37signals/) |
 | [`every`](registry/every/) | org | self-published | [develop-like-every](registry/every/skill/develop-like-every/) |
+| [`linear`](registry/linear/) | org | self-published | [develop-like-linear](registry/linear/skill/develop-like-linear/) |
 | [`oxide`](registry/oxide/) | org | self-published | [develop-like-oxide](registry/oxide/skill/develop-like-oxide/) |
 | [`theo`](registry/theo/) | person | stated | generated on demand |
 
