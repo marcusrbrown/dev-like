@@ -38,12 +38,12 @@
     "."
   ],
   "scripts": {
-    "validate": "node scripts/validate.mjs",
+    "validate": "node scripts/validate.mjs && node scripts/sync-release-version.mjs --check",
     "eval:paired": "node evals/paired/run.mjs",
     "test": "node --test tests/*.test.mjs && bun test tests/*.test.ts",
     "prepublishOnly": "bun run validate && bun run test",
-    "version-changesets": "changeset version",
-    "publish-changesets": "changeset publish",
+    "version-changesets": "changeset version && node scripts/sync-release-version.mjs",
+    "publish-changesets": "node scripts/sync-release-version.mjs --check && changeset publish",
     "alias-release": "bun run .github/scripts/alias-release.ts"
   },
   "devDependencies": {

@@ -8,7 +8,7 @@ The main contribution is **registry profiles** — usually the natural endpoint 
 1. `registry/<slug>/entry.json` — must pass `registry/schema/entry.schema.json`.
 2. `registry/<slug>/profile.md` — every claim carries a source link. No source, no claim.
 3. Update `registry/index.json` (CI checks index/entry sync).
-4. `node scripts/validate.mjs` must pass.
+4. `bun run validate` must pass (registry checks plus plugin/skill release-version lockstep).
 
 ## Hard rules
 
