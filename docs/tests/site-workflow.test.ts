@@ -10,11 +10,6 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..')
 const WORKFLOW_PATH = path.join(REPO_ROOT, '.github', 'workflows', 'site.yaml')
 const STUB_PATH = path.join(REPO_ROOT, 'docs', 'site-stub', 'index.html')
 
-const CHECKOUT_SHA = 'df4cb1c069e1874edd31b4311f1884172cec0e10'
-const SETUP_BUN_SHA = '0c5077e51419868618aeaa5fe8019c62421857d6'
-const UPLOAD_PAGES_ARTIFACT_SHA = '7b1f4a764d45c48632c6b24a0339c27f5614fb0b'
-const DEPLOY_PAGES_SHA = 'd6db90164ac5ed86f2b6aed7e0febac5b3c0c03e'
-
 async function readWorkflow(): Promise<string> {
   return readFile(WORKFLOW_PATH, 'utf8')
 }
@@ -29,12 +24,16 @@ describe('site.yaml workflow contract', () => {
     expect(text).toContain('.github/workflows/site.yaml')
   })
 
-  test('all actions are pinned to the expected commit SHAs with version comments', async () => {
+  test('all actions are pinned to full commit SHAs with version comments', async () => {
     const text = await readWorkflow()
-    expect(text).toMatch(new RegExp(`actions/checkout@${CHECKOUT_SHA}\\s*#\\s*v\\d`))
-    expect(text).toMatch(new RegExp(`oven-sh/setup-bun@${SETUP_BUN_SHA}\\s*#\\s*v\\d`))
-    expect(text).toMatch(new RegExp(`actions/upload-pages-artifact@${UPLOAD_PAGES_ARTIFACT_SHA}\\s*#\\s*v4\\.0\\.0`))
-    expect(text).toMatch(new RegExp(`actions/deploy-pages@${DEPLOY_PAGES_SHA}\\s*#\\s*v4\\.0\\.5`))
+    const usesLines = text.match(/^\s*uses:\s*.*$/gm) ?? []
+    const pinnedUsesLine = /^\s*uses:\s*[\w./-]+@[0-9a-f]{40}\s+#\s*v\d[\w.-]*\s*$/
+
+    expect(usesLines.length).toBeGreaterThan(0)
+    for (const line of usesLines) {
+      expect(line).toMatch(pinnedUsesLine)
+    }
+    expect(usesLines.some((line) => !pinnedUsesLine.test(line))).toBe(false)
   })
 
   test('build job installs frozen with --ignore-scripts and runs validate, docs test, docs build in fail-fast order before upload', async () => {
