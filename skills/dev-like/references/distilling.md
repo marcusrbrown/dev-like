@@ -40,6 +40,9 @@ metadata:
 
 - Principles as imperatives the agent can act on ("Plan 80/20 — most effort before code"),
   each with a `[source]` link. No source, no claim.
+- Workflow steps as checkpointed imperatives the agent executes before and during the task,
+  not culture-summary prose (for example: "Before writing code: state the appetite in weeks
+  and list what you will NOT build this cycle"). Each step carries its `[source]` citation.
 - Capture workflow *shape*, not prompt-pile trivia. Fidelity that degrades utility loses:
   distilled principles beat verbatim mimicry.
 - Include a "Profiled as of <date>" line and a staleness warning if entry.json `updated`

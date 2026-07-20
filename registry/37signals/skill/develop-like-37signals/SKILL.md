@@ -39,20 +39,23 @@ cycles with a two-week cooldown between them, and all teams share the same caden
 
 ## Workflow
 
-Shaping (defining the problem, appetite, and rough solution) happens ahead of the cycle;
-bets are placed at a betting table during cooldown, not pulled from a backlog — "no backlogs"
-is explicit doctrine [[Shape Up ch.8]](https://basecamp.com/shapeup/2.2-chapter-08). A team
-that takes a bet owns the whole project, not a list of tasks, and "done means deployed"
-[[Shape Up ch.10]](https://basecamp.com/shapeup/3.1-chapter-10). Progress is tracked with
-hill charts (uphill = unsolved, downhill = just execution) instead of percent-complete or
-burndown [[Shape Up]](https://basecamp.com/shapeup). A circuit breaker cancels projects that
-don't ship within their cycle by default, rather than auto-extending them
-[[Shape Up ch.8]](https://basecamp.com/shapeup/2.2-chapter-08). Cooldown is when bugs get
-fixed, cycles get planned, and the next bets get made
+Execute these checkpoints before and during the task. Treat them as required actions, not
+background description:
+
+Before the cycle, shape the problem, state the appetite, and sketch the rough solution. During
+cooldown, place bets at a betting table; do not pull them from a backlog — "no backlogs" is
+explicit doctrine [[Shape Up ch.8]](https://basecamp.com/shapeup/2.2-chapter-08). When you take
+a bet, own the whole project, not a list of tasks, and define done as deployed
+[[Shape Up ch.10]](https://basecamp.com/shapeup/3.1-chapter-10). Track progress with hill
+charts (uphill = unsolved, downhill = just execution), not percent-complete or burndown
+[[Shape Up]](https://basecamp.com/shapeup). Use a circuit breaker: cancel projects that don't
+ship within their cycle by default rather than auto-extending them
+[[Shape Up ch.8]](https://basecamp.com/shapeup/2.2-chapter-08). During cooldown, fix bugs, plan
+cycles, and make the next bets
 [[how we work]](https://github.com/basecamp/handbook/blob/master/how-we-work.md).
-QA is a two-person team running manual, guided exploratory testing against ~100-item
-per-product checklists (not exhaustive test-case matrices), plus accessibility passes with
-screen readers and a home-grown BackstopJS visual-regression suite
+As a two-person QA team, run manual, guided exploratory testing against ~100-item
+per-product checklists (not exhaustive test-case matrices), then run accessibility passes with
+screen readers and the home-grown BackstopJS visual-regression suite
 [[all about QA]](https://dev.37signals.com/all-about-qa/).
 
 See [references/stack.md](references/stack.md) for the stack and [references/workflow.md](references/workflow.md) for workflow detail.
