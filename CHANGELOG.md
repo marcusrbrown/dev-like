@@ -1,5 +1,13 @@
 # dev-like
 
+## 0.4.1
+
+### Patch Changes
+
+- 6e023b5: Add a social-preview banner and themed for-the-badge badges to the README.
+- 8186a2c: Restore a centered README title and reorder the header tagline above the badges.
+- 479acbe: Update README registry table to list all five profiles.
+
 ## 0.4.0
 
 ### Minor Changes
