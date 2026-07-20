@@ -13,7 +13,7 @@
   --sl-color-gray-5: oklch(0.85 0.01 var(--sl-hue));
   --sl-color-black: oklch(0.99 0.002 var(--sl-hue));
 
-  --accent-highlighter: oklch(0.6 0.2 250);
+  --accent-highlighter: oklch(0.52 0.2 250);
   --sl-color-accent-high: var(--accent-highlighter);
   --sl-color-accent: var(--accent-highlighter);
 
@@ -368,7 +368,7 @@ button[data-cta="primary"]:focus-visible {
   font-size: 0.75rem;
   color: var(--accent-highlighter) !important;
   text-decoration: none;
-  opacity: 0.6;
+  opacity: 1;
   vertical-align: super;
   margin-left: 0.2rem;
   transition: opacity 0.2s;
