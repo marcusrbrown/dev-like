@@ -1,0 +1,19 @@
+---
+_extends: .github:common-settings.yaml
+
+repository:
+  name: dev-like
+  description: Profile a shop's engineering culture from public sources and install develop-like-<target> agent skills. /dev-like Every
+  homepage: https://mrbro.dev/dev-like/
+  topics: [agent-skills, ai-agents, claude-code, codex, cursor, engineering-culture, portfolio]
+
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        strict: true
+        contexts: [validate, "Fro Bot"]
+      enforce_admins: true
+      required_pull_request_reviews: null
+      required_linear_history: true
+      restrictions: null
