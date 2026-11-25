@@ -3,11 +3,11 @@
 // Zero runtime deps. Grades WORKFLOW SHAPE from claude -p JSONL tool traces, not prose vibes.
 // n=1 per side — see report header for the determinism caveat.
 
-import { spawn } from 'node:child_process';
 import { mkdtemp, mkdir, cp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { run } from './run-process.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(HERE, '..', '..');
@@ -21,27 +21,6 @@ const TASK_PROMPT =
 
 const MAX_TURNS = 15;
 const TIMEOUT_MS = 10 * 60 * 1000; // 10 min per side
-
-function run(cmd, args, opts = {}) {
-  return new Promise((resolvePromise, reject) => {
-    const child = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'], ...opts });
-    let stdout = '';
-    let stderr = '';
-    child.stdout.on('data', (d) => { stdout += d; });
-    child.stderr.on('data', (d) => { stderr += d; });
-    const timer = opts.timeoutMs
-      ? setTimeout(() => {
-          child.kill('SIGKILL');
-          reject(new Error(`timed out after ${opts.timeoutMs}ms running ${cmd} ${args.join(' ')}`));
-        }, opts.timeoutMs)
-      : null;
-    child.on('error', (err) => { if (timer) clearTimeout(timer); reject(err); });
-    child.on('close', (code) => {
-      if (timer) clearTimeout(timer);
-      resolvePromise({ code, stdout, stderr });
-    });
-  });
-}
 
 async function setupArm(name, { withSkill }) {
   const dir = await mkdtemp(join(tmpdir(), `dev-like-eval-${name}-`));

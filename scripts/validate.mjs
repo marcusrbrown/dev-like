@@ -7,6 +7,7 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderSkill, parseSections } from './generate-skill.mjs';
+import { checkSchema } from './schema-check.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -14,10 +15,7 @@ async function fssExists(path) {
   return stat(path).then(() => true).catch(() => false);
 }
 
-const TIERS = ['self-published', 'stated', 'observed', 'social'];
-const PERSON_TIERS = ['self-published', 'stated'];
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Mirrors docs/scripts/generate-registry-pages.ts's HTML_JSX_TAG_RE — keep the two in sync.
 // Catches things like a stray copy-paste `</content>` tag reaching profile.md, which the
@@ -69,6 +67,9 @@ async function validateSkills() {
 
 async function validateRegistry(regDir = join(ROOT, 'registry')) {
   const index = JSON.parse(await readFile(join(regDir, 'index.json'), 'utf8'));
+  // The schema is the contract for entry.json: enums, required fields, length limits,
+  // additionalProperties and the person-tier rule all come from it, not from this file.
+  const entrySchema = JSON.parse(await readFile(join(ROOT, 'registry', 'schema', 'entry.schema.json'), 'utf8'));
   const dirs = [];
   for (const name of await readdir(regDir)) {
     const p = join(regDir, name);
@@ -80,19 +81,12 @@ async function validateRegistry(regDir = join(ROOT, 'registry')) {
     const entry = JSON.parse(await readFile(entryPath, 'utf8').catch(() => 'null'));
     if (!entry) { fail(`${slug}: missing entry.json`); continue; }
 
+    for (const violation of checkSchema(entrySchema, entry)) fail(`${slug}: entry.json violates schema: ${violation}`);
+    // Rules the schema cannot express: slug must match its directory, and source
+    // links must be http(s) (the schema only requires a well-formed URI).
     if (entry.slug !== slug) fail(`${slug}: entry.slug mismatch`);
-    if (!SLUG_RE.test(slug)) fail(`${slug}: invalid slug`);
-    if (!['org', 'person'].includes(entry.kind)) fail(`${slug}: bad kind`);
-    if (!TIERS.includes(entry.consentTier)) fail(`${slug}: bad consentTier`);
-    if (entry.kind === 'person' && !PERSON_TIERS.includes(entry.consentTier))
-      fail(`${slug}: persons require consentTier stated or better`);
-    if (!DATE_RE.test(entry.updated ?? '')) fail(`${slug}: bad updated date`);
-    if (!Array.isArray(entry.sources) || entry.sources.length === 0)
-      fail(`${slug}: sources[] required`);
-    for (const s of entry.sources ?? []) {
-      if (!s.url?.startsWith('http')) fail(`${slug}: bad source url ${s.url}`);
-      if (!DATE_RE.test(s.fetched ?? '')) fail(`${slug}: source missing fetched date`);
-      if (!TIERS.includes(s.tier)) fail(`${slug}: bad source tier`);
+    for (const s of Array.isArray(entry.sources) ? entry.sources : []) {
+      if (!/^https?:\/\//.test(s?.url ?? '')) fail(`${slug}: bad source url ${s?.url}`);
     }
 
     const profile = await readFile(join(regDir, slug, 'profile.md'), 'utf8').catch(() => null);

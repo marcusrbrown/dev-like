@@ -183,3 +183,73 @@ test('validate fails when a committed prebuilt skill/ tree has drifted from prof
     await fs.rm(regDir, { recursive: true, force: true });
   }
 });
+
+// ---- registry/schema/entry.schema.json enforcement ------------------------
+
+// Runs validate() against a copy of the real `every` entry after `mutate` edits its
+// entry.json, and returns whether it passed plus every FAIL line it printed.
+async function validateMutatedEntry(mutate) {
+  const { regDir } = await makeDriftFixture();
+  const entryPath = path.join(regDir, 'every', 'entry.json');
+  const failures = [];
+  const origErr = console.error;
+  const origLog = console.log;
+  try {
+    const entry = JSON.parse(await fs.readFile(entryPath, 'utf8'));
+    mutate(entry);
+    await fs.writeFile(entryPath, JSON.stringify(entry, null, 2), 'utf8');
+    console.log = () => {};
+    console.error = (msg) => { failures.push(String(msg)); };
+    const passed = await validate({ regDir });
+    return { passed, failures };
+  } finally {
+    console.log = origLog;
+    console.error = origErr;
+    await fs.rm(regDir, { recursive: true, force: true });
+  }
+}
+
+const schemaFailure = (failures, fragment) =>
+  failures.some((line) => line.includes('schema') && line.includes(fragment));
+
+test('validate enforces the entry schema: required name', async () => {
+  const { passed, failures } = await validateMutatedEntry((e) => { delete e.name; });
+  assert.equal(passed, false);
+  assert.ok(schemaFailure(failures, 'name'), `expected a schema failure naming "name", got:\n${failures.join('\n')}`);
+});
+
+test('validate enforces the entry schema: additionalProperties false', async () => {
+  const { passed, failures } = await validateMutatedEntry((e) => { e.bogus = true; });
+  assert.equal(passed, false);
+  assert.ok(schemaFailure(failures, 'bogus'), `expected a schema failure naming "bogus", got:\n${failures.join('\n')}`);
+});
+
+test('validate enforces the entry schema: additionalProperties false on sources[]', async () => {
+  const { passed, failures } = await validateMutatedEntry((e) => { e.sources[0].extra = 'x'; });
+  assert.equal(passed, false);
+  assert.ok(schemaFailure(failures, 'extra'), `expected a schema failure naming "extra", got:\n${failures.join('\n')}`);
+});
+
+test('validate enforces the entry schema: maxLength', async () => {
+  const { passed, failures } = await validateMutatedEntry((e) => { e.summary = 'x'.repeat(161); });
+  assert.equal(passed, false);
+  assert.ok(schemaFailure(failures, 'summary'), `expected a schema failure naming "summary", got:\n${failures.join('\n')}`);
+});
+
+test('validate enforces the entry schema: enum', async () => {
+  const { passed, failures } = await validateMutatedEntry((e) => { e.kind = 'team'; });
+  assert.equal(passed, false);
+  assert.ok(schemaFailure(failures, 'kind'), `expected a schema failure naming "kind", got:\n${failures.join('\n')}`);
+});
+
+test('validate enforces the entry schema: person consentTier conditional', async () => {
+  const { passed, failures } = await validateMutatedEntry((e) => { e.kind = 'person'; e.consentTier = 'social'; });
+  assert.equal(passed, false);
+  assert.ok(schemaFailure(failures, 'consentTier'), `expected a schema failure naming "consentTier", got:\n${failures.join('\n')}`);
+});
+
+test('validate keeps source urls restricted to http(s) even though the schema only requires a uri', async () => {
+  const { passed, failures } = await validateMutatedEntry((e) => { e.sources[0].url = 'ftp://example.com/x'; });
+  assert.equal(passed, false);
+  assert.ok(failures.some((line) => line.includes('bad source url')), failures.join('\n'));
+});
