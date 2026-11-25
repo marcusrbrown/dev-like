@@ -7,7 +7,11 @@ const ANNOTATIONS = new Set(['$schema', '$id', 'title', 'description']);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const FORMATS = {
-  date: (s) => DATE_RE.test(s) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s,
+  date: (s) => {
+    if (!DATE_RE.test(s)) return false;
+    const d = new Date(`${s}T00:00:00Z`);
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+  },
   uri: (s) => URL.canParse(s),
 };
 
@@ -29,7 +33,7 @@ export function checkSchema(schema, value, at = '') {
     if (ANNOTATIONS.has(kw)) continue;
     switch (kw) {
       case 'type':
-        if (!TYPES[arg]) throw new Error(`schema-check: unsupported type "${arg}"`);
+        if (!Object.hasOwn(TYPES, arg)) throw new Error(`schema-check: unsupported type "${arg}"`);
         if (!TYPES[arg](value)) err(`expected ${arg}`);
         break;
       case 'enum':
@@ -48,7 +52,7 @@ export function checkSchema(schema, value, at = '') {
         if (typeof value === 'string' && [...value].length > arg) err(`must be at most ${arg} characters`);
         break;
       case 'format':
-        if (!FORMATS[arg]) throw new Error(`schema-check: unsupported format "${arg}"`);
+        if (!Object.hasOwn(FORMATS, arg)) throw new Error(`schema-check: unsupported format "${arg}"`);
         if (typeof value === 'string' && !FORMATS[arg](value)) err(`must be a valid ${arg}`);
         break;
       case 'minItems':
@@ -63,13 +67,13 @@ export function checkSchema(schema, value, at = '') {
         break;
       case 'required':
         if (TYPES.object(value)) {
-          for (const key of arg) if (!(key in value)) err(`required property "${key}" is missing`);
+          for (const key of arg) if (!Object.hasOwn(value, key)) err(`required property "${key}" is missing`);
         }
         break;
       case 'properties':
         if (TYPES.object(value)) {
           for (const [key, sub] of Object.entries(arg)) {
-            if (key in value) errors.push(...checkSchema(sub, value[key], `${at}/${key}`));
+            if (Object.hasOwn(value, key)) errors.push(...checkSchema(sub, value[key], `${at}/${key}`));
           }
         }
         break;
@@ -77,7 +81,7 @@ export function checkSchema(schema, value, at = '') {
         if (arg !== false) throw new Error('schema-check: only additionalProperties:false is supported');
         if (TYPES.object(value)) {
           for (const key of Object.keys(value)) {
-            if (!(key in (schema.properties ?? {}))) err(`unexpected property "${key}"`);
+            if (!Object.hasOwn(schema.properties ?? {}, key)) err(`unexpected property "${key}"`);
           }
         }
         break;

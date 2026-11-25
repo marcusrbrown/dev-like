@@ -49,3 +49,31 @@ test('run() rejects on timeout and leaves no descendant processes behind', { ski
     await fs.rm(dir, { recursive: true, force: true });
   }
 });
+
+test('run() still rejects as timed out, and kills the child, when the group kill fails with EPERM', { skip: !posix }, async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'dev-like-paired-run-'));
+  const pidFile = path.join(dir, 'child.pid');
+  let pid = null;
+  const killGroup = () => {
+    throw Object.assign(new Error('operation not permitted'), { code: 'EPERM' });
+  };
+  try {
+    const script = `require('node:fs').writeFileSync(process.argv[1], String(process.pid)); setInterval(() => {}, 1000)`;
+    await assert.rejects(
+      run(process.execPath, ['-e', script, pidFile], { timeoutMs: 1500, killGroup }),
+      /timed out after 1500ms/,
+    );
+
+    pid = Number((await fs.readFile(pidFile, 'utf8')).trim());
+    assert.ok(Number.isInteger(pid) && pid > 0, 'fixture must record the child pid before timing out');
+
+    // The group kill was forced to fail, so only the direct-child fallback can have killed it.
+    for (let i = 0; i < 30 && isAlive(pid); i++) await sleep(100);
+    assert.equal(isAlive(pid), false, `child ${pid} survived: no SIGKILL fallback after the group kill failed`);
+  } finally {
+    if (pid) {
+      try { process.kill(pid, 'SIGKILL'); } catch { /* already gone */ }
+    }
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
