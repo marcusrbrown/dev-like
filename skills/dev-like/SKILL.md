@@ -10,7 +10,7 @@ license: MIT
 argument-hint: "<company | person | alias> (e.g. Every, Theo, theo.gg)"
 metadata:
   author: marcusrbrown
-  version: "0.4.1"
+  version: "0.4.2"
   repository: https://github.com/marcusrbrown/dev-like
 ---
 
