@@ -205,6 +205,14 @@ jobs:
           auth-json: ${{ secrets.OPENCODE_AUTH_JSON }}
           opencode-config: ${{ secrets.OPENCODE_CONFIG }}
           model: ${{ vars.FRO_BOT_MODEL }}
+          # The autoheal pass (schedule, or dispatch with mode=autoheal) and dispatched
+          # prompts deliver fixes as branch + PR; the default (auto -> working-dir)
+          # discards them. pr-review dispatches and other events stay on auto.
+          output-mode: >-
+            ${{
+              (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.prompt != '' || github.event.inputs.mode == 'autoheal')))
+              && 'branch-pr' || 'auto'
+            }}
           prompt: ${{ env.PROMPT }}
           isolate-agent: true
           trace-endpoint: https://traces.fro.bot/marcusrbrown/v1/traces
