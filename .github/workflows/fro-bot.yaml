@@ -204,7 +204,35 @@ jobs:
           github-token: ${{ secrets.FRO_BOT_PAT }}
           auth-json: ${{ secrets.OPENCODE_AUTH_JSON }}
           opencode-config: ${{ secrets.OPENCODE_CONFIG }}
-          model: ${{ vars.FRO_BOT_MODEL }}
+          # Model by kind of work. The tiers are mutually exclusive and each carries its own
+          # FRO_BOT_MODEL fallback: `true && ''` is falsy, so a bare tier would fall through to
+          # the next tier instead of the fallback.
+          #   review: pull_request, pull_request_review_comment, issue_comment on a pull request,
+          #           workflow_dispatch with mode=pr-review and no custom prompt
+          #   act:    schedule, and every other workflow_dispatch
+          #   light:  issues, issue_comment on an issue (not a pull request)
+          # Any other event uses FRO_BOT_MODEL. tests/fro-bot-model.test.ts pins this table.
+          model: >-
+            ${{
+              (
+                github.event_name == 'pull_request' ||
+                github.event_name == 'pull_request_review_comment' ||
+                (github.event_name == 'issue_comment' && github.event.issue.pull_request) ||
+                (github.event_name == 'workflow_dispatch' && github.event.inputs.prompt == '' && github.event.inputs.mode == 'pr-review')
+              ) && (vars.FRO_BOT_MODEL_REVIEW || vars.FRO_BOT_MODEL) ||
+              (
+                github.event_name == 'schedule' ||
+                (
+                  github.event_name == 'workflow_dispatch' &&
+                  !(github.event.inputs.prompt == '' && github.event.inputs.mode == 'pr-review')
+                )
+              ) && (vars.FRO_BOT_MODEL_ACT || vars.FRO_BOT_MODEL) ||
+              (
+                github.event_name == 'issues' ||
+                (github.event_name == 'issue_comment' && !github.event.issue.pull_request)
+              ) && (vars.FRO_BOT_MODEL_LIGHT || vars.FRO_BOT_MODEL) ||
+              vars.FRO_BOT_MODEL
+            }}
           # The autoheal pass (schedule, or dispatch with mode=autoheal) and dispatched
           # prompts deliver fixes as branch + PR; the default (auto -> working-dir)
           # discards them. pr-review dispatches and other events stay on auto.
