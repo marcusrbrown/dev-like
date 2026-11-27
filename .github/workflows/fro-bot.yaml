@@ -204,7 +204,27 @@ jobs:
           github-token: ${{ secrets.FRO_BOT_PAT }}
           auth-json: ${{ secrets.OPENCODE_AUTH_JSON }}
           opencode-config: ${{ secrets.OPENCODE_CONFIG }}
-          model: ${{ vars.FRO_BOT_MODEL }}
+          # Model by kind of work: review (pull requests, and pr-review dispatches), act
+          # (schedule and dispatched prompts), light (issues and issue comments). An empty
+          # variable falls back to FRO_BOT_MODEL.
+          model: >-
+            ${{
+              (
+                github.event_name == 'pull_request' ||
+                github.event_name == 'pull_request_review_comment' ||
+                (github.event_name == 'issue_comment' && github.event.issue.pull_request) ||
+                (github.event_name == 'workflow_dispatch' && github.event.inputs.prompt == '' && github.event.inputs.mode == 'pr-review')
+              ) && vars.FRO_BOT_MODEL_REVIEW ||
+              (
+                github.event_name == 'schedule' ||
+                github.event_name == 'workflow_dispatch'
+              ) && vars.FRO_BOT_MODEL_ACT ||
+              (
+                github.event_name == 'issues' ||
+                github.event_name == 'issue_comment'
+              ) && vars.FRO_BOT_MODEL_LIGHT ||
+              vars.FRO_BOT_MODEL
+            }}
           # The autoheal pass (schedule, or dispatch with mode=autoheal) and dispatched
           # prompts deliver fixes as branch + PR; the default (auto -> working-dir)
           # discards them. pr-review dispatches and other events stay on auto.
